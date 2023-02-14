@@ -14,7 +14,6 @@ import ru.suai.diplom.dto.response.YandexResponse
 import ru.suai.diplom.utils.constants.GlobalConstants.BASE_URL_TAXINF
 import ru.suai.diplom.utils.constants.GlobalConstants.BASE_URL_YANDEX
 import ru.suai.diplom.utils.unescapeUnicode
-import javax.annotation.PostConstruct
 
 @Component
 class PriceClient(
@@ -26,7 +25,6 @@ class PriceClient(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val gson = Gson()
 
-    @PostConstruct
     fun getPriceYandex(
         longitudeFrom: Double,
         latitudeFrom: Double,
@@ -49,7 +47,6 @@ class PriceClient(
         }
     }
 
-    @PostConstruct
     fun getPriceOtherTaxi(
         longitudeFrom: Double,
         latitudeFrom: Double,
