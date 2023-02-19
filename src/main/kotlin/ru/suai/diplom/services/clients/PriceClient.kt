@@ -1,4 +1,4 @@
-package ru.suai.diplom.services
+package ru.suai.diplom.services.clients
 
 import com.google.gson.Gson
 import okhttp3.OkHttpClient

@@ -4,6 +4,7 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
+@Table(name = "order_history")
 open class OrderHistory(
     @Enumerated(value = EnumType.STRING)
     open var status: Status,

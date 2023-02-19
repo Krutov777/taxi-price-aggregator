@@ -5,24 +5,24 @@ import javax.persistence.*
 @Entity
 open class Route(
     @Column(name = "from_address")
-    open var fromAddress: String,
+    open var fromAddress: String? = null,
     @Column(name = "toAddress")
-    open var toAddress: String,
+    open var toAddress: String? = null,
     @Column(name = "from_latitude")
-    open var fromLatitude: Double,
+    open var fromLatitude: Double? = null,
     @Column(name = "from_longitude")
-    open var fromLongitude: Double,
+    open var fromLongitude: Double? = null,
     @Column(name = "to_latitude")
-    open var toLatitude: Double,
+    open var toLatitude: Double? = null,
     @Column(name = "to_longitude")
-    open var toLongitude: Double,
+    open var toLongitude: Double? = null,
 
     @OneToMany(mappedBy = "route")
-    open var orderHistory: MutableSet<OrderHistory>,
+    open var orderHistory: MutableSet<OrderHistory>? = null,
     @OneToMany(mappedBy = "route")
-    open var orderPrice: MutableSet<OrderPrice>,
+    open var orderPrice: MutableSet<OrderPrice>? = null,
     @OneToMany(mappedBy = "route")
-    open var price: MutableList<Price>,
+    open var price: MutableList<Price>? = null,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
