@@ -5,7 +5,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import ru.suai.diplom.models.User
 
-class AccountUserDetails(private val user: User) : UserDetails {
+class UserDetails(private val user: User) :
+    UserDetails {
 
     override fun getAuthorities(): Collection<GrantedAuthority?> {
         return setOf(SimpleGrantedAuthority(user.role?.name))

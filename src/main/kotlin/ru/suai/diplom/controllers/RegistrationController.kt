@@ -2,11 +2,13 @@ package ru.suai.diplom.controllers
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.RestController
 import ru.suai.diplom.api.RegistrationApi
 import ru.suai.diplom.dto.request.SignUpForm
 import ru.suai.diplom.dto.response.SignUpResponse
 import ru.suai.diplom.services.SignUpService
+
 
 @RestController
 class RegistrationController(private val signUpService: SignUpService) : RegistrationApi {
@@ -14,5 +16,11 @@ class RegistrationController(private val signUpService: SignUpService) : Registr
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(signUpService.singUp(form))
+    }
+
+    override fun signOut(authentication: Authentication?): ResponseEntity<Any> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(signUpService.signOut(authentication))
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 import ru.suai.diplom.models.User
-import ru.suai.diplom.security.details.AccountUserDetails
+import ru.suai.diplom.security.details.UserDetails
 import ru.suai.diplom.security.utils.JwtUtil
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -21,8 +21,8 @@ class JwtUtilImpl(
 ) : JwtUtil {
 
     companion object {
-        private const val ACCESS_TOKEN_EXPIRES_TIME: Long = 2 * 60 * 60 * 1000 // TWO HOURS
-        private const val REFRESH_TOKEN_EXPIRES_TIME: Long = 4 * 60 * 60 * 1000 // FOUR HOURS
+        private const val ACCESS_TOKEN_EXPIRES_TIME: Long = 1 * 60 * 60 * 1000 // ONE HOUR
+        private const val REFRESH_TOKEN_EXPIRES_TIME: Long = 24 * 60 * 60 * 1000 // 24 HOURS
     }
 
     data class ParsedToken(
@@ -53,7 +53,7 @@ class JwtUtilImpl(
     override fun buildAuthentication(token: String): Authentication {
         val parsedToken = parse(token)
         return UsernamePasswordAuthenticationToken(
-            AccountUserDetails(
+            UserDetails(
                 User(
                     role = User.Role.valueOf(parsedToken.role.toString()),
                     email = parsedToken.email

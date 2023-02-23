@@ -12,38 +12,65 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import ru.suai.diplom.dto.response.ValidationExceptionResponse
-import ru.suai.diplom.exceptions.AccessException
-import ru.suai.diplom.exceptions.BadPasswordException
-import ru.suai.diplom.exceptions.EntityNotFoundException
-import ru.suai.diplom.exceptions.OccupiedEmailException
+import ru.suai.diplom.exceptions.*
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
+import javax.servlet.http.HttpServletRequest
+
 
 @RestControllerAdvice
 class ControllerExceptionHandler {
+    val dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
+
     @ExceptionHandler(value = [HttpMessageNotReadableException::class])
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleAccessDeniedException(exception: HttpMessageNotReadableException): ResponseEntity<ValidationExceptionResponse> {
-        val response: ValidationExceptionResponse = ValidationExceptionResponse(
-            errors = listOf(
-                ValidationExceptionResponse.ValidationErrorDto(message = exception.message)
+    fun handleAccessDeniedException(
+        exception: HttpMessageNotReadableException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ValidationExceptionResponse(
+                errors = listOf(
+                    ValidationExceptionResponse.ValidationErrorDto(
+                        objectName = exception.javaClass.toString(),
+                        exception = exception.javaClass.canonicalName,
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
+                    )
+                )
             )
         )
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body<ValidationExceptionResponse>(response)
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleValidationException(exception: MethodArgumentNotValidException): ResponseEntity<ValidationExceptionResponse> {
-        val errors: MutableList<ValidationExceptionResponse.ValidationErrorDto> =
-            ArrayList()
+    fun handleValidationException(
+        exception: MethodArgumentNotValidException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
+        val errors = mutableListOf<ValidationExceptionResponse.ValidationErrorDto>()
         exception.bindingResult.allErrors.forEach(Consumer { error: ObjectError ->
+            val errorMessage = error.defaultMessage
             val errorDto: ValidationExceptionResponse.ValidationErrorDto =
-                ValidationExceptionResponse.ValidationErrorDto(message = error.defaultMessage)
-            var objectName: String? = null
-            objectName = if (error is FieldError) {
-                error.field
-            } else {
-                error.objectName
+                ValidationExceptionResponse.ValidationErrorDto(
+                    message = errorMessage,
+                    objectName = exception.javaClass.toString(),
+                    exception = exception.javaClass.canonicalName,
+                    path = request.requestURI.toString(),
+                    timestamp = DateTimeFormatter
+                        .ofPattern(dateFormat)
+                        .withZone(ZoneOffset.UTC)
+                        .format(Instant.now())
+                )
+            val objectName: String? = when (error) {
+                is FieldError -> error.field
+                else -> error.objectName
             }
             errorDto.objectName = objectName
             errors.add(errorDto)
@@ -54,12 +81,22 @@ class ControllerExceptionHandler {
 
     @ExceptionHandler(value = [AccessDeniedException::class])
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun handleAccessDeniedException(exception: AccessDeniedException): ResponseEntity<ValidationExceptionResponse> {
+    fun handleAccessDeniedException(
+        exception: AccessDeniedException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
             ValidationExceptionResponse(
                 errors = listOf(
                     ValidationExceptionResponse.ValidationErrorDto(
-                        message = exception.message
+                        objectName = exception.javaClass.toString(),
+                        exception = exception.javaClass.canonicalName,
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
                     )
                 )
             )
@@ -68,12 +105,22 @@ class ControllerExceptionHandler {
 
     @ExceptionHandler(value = [AuthenticationException::class])
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    fun handleAuthenticationException(exception: AuthenticationException): ResponseEntity<ValidationExceptionResponse> {
+    fun handleAuthenticationException(
+        exception: AuthenticationException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
             ValidationExceptionResponse(
                 errors = listOf(
                     ValidationExceptionResponse.ValidationErrorDto(
-                        message = exception.message
+                        objectName = exception.javaClass.toString(),
+                        exception = exception.javaClass.canonicalName,
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
                     )
                 )
             )
@@ -82,12 +129,22 @@ class ControllerExceptionHandler {
 
     @ExceptionHandler(value = [AccessException::class])
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun handleAccessException(exception: AccessException): ResponseEntity<ValidationExceptionResponse> {
+    fun handleAccessException(
+        exception: AccessException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
             ValidationExceptionResponse(
                 errors = listOf(
                     ValidationExceptionResponse.ValidationErrorDto(
-                        message = exception.message
+                        objectName = exception.javaClass.toString(),
+                        exception = exception.javaClass.canonicalName,
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
                     )
                 )
             )
@@ -96,14 +153,22 @@ class ControllerExceptionHandler {
 
     @ExceptionHandler(BadPasswordException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleBadPasswordException(exception: BadPasswordException): ResponseEntity<ValidationExceptionResponse> {
+    fun handleBadPasswordException(
+        exception: BadPasswordException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
             ValidationExceptionResponse(
                 errors = listOf(
                     ValidationExceptionResponse.ValidationErrorDto(
-                        objectName = "Registration",
+                        objectName = exception.javaClass.toString(),
                         exception = exception.javaClass.canonicalName,
-                        message = exception.message
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
                     )
                 )
             )
@@ -111,14 +176,22 @@ class ControllerExceptionHandler {
     }
 
     @ExceptionHandler(OccupiedEmailException::class)
-    fun handleOccupiedEmailException(exception: OccupiedEmailException): ResponseEntity<ValidationExceptionResponse> {
+    fun handleOccupiedEmailException(
+        exception: OccupiedEmailException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
             ValidationExceptionResponse(
                 errors = listOf(
                     ValidationExceptionResponse.ValidationErrorDto(
-                        objectName = "Registration",
+                        objectName = exception.javaClass.toString(),
                         exception = exception.javaClass.canonicalName,
-                        message = exception.message
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
                     )
                 )
             )
@@ -127,30 +200,46 @@ class ControllerExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundException(exception: EntityNotFoundException): ResponseEntity<ValidationExceptionResponse> {
+    fun handleNotFoundException(
+        exception: EntityNotFoundException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
             ValidationExceptionResponse(
                 errors = listOf(
                     ValidationExceptionResponse.ValidationErrorDto(
-                        objectName = "Registration",
+                        objectName = exception.javaClass.toString(),
                         exception = exception.javaClass.canonicalName,
-                        message = exception.message
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
                     )
                 )
             )
         )
     }
 
-    @ExceptionHandler(Exception::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    fun handleAnyException(exception: Exception): ResponseEntity<ValidationExceptionResponse> {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+    @ExceptionHandler(value = [BadRoleException::class])
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleBadRoleException(
+        exception: BadRoleException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
             ValidationExceptionResponse(
                 errors = listOf(
                     ValidationExceptionResponse.ValidationErrorDto(
-                        objectName = "Registration",
+                        objectName = exception.javaClass.toString(),
                         exception = exception.javaClass.canonicalName,
-                        message = exception.message
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
                     )
                 )
             )

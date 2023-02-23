@@ -36,7 +36,6 @@ open class User(
 
     companion object {
         fun from(form: SignUpForm): User {
-
             return User(
                 firstName = form.firstName,
                 lastName = form.lastName,

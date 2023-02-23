@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -30,5 +31,17 @@ interface RegistrationApi {
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
-    fun signUp(@RequestBody form: @Valid SignUpForm): ResponseEntity<SignUpResponse>
+    fun signUp(@Valid @RequestBody form: SignUpForm): ResponseEntity<SignUpResponse>
+
+    @Operation(summary = "Logout")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "Пользователь вышел из аккаунта"
+        ), ApiResponse(responseCode = "400", description = "Ошибка при logout")]
+    )
+    @PostMapping(
+        value = ["/signOut"]
+    )
+    fun signOut(authentication: Authentication?): ResponseEntity<Any>
 }

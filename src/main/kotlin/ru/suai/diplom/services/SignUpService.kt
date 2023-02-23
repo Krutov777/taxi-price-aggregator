@@ -7,5 +7,5 @@ import ru.suai.diplom.dto.response.SignUpResponse
 interface SignUpService {
     fun singUp(form: SignUpForm): SignUpResponse
 
-    fun signOut(authentication: Authentication)
+    fun signOut(authentication: Authentication?): String
 }
