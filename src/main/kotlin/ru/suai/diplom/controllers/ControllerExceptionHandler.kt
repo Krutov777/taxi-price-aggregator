@@ -198,6 +198,29 @@ class ControllerExceptionHandler {
         )
     }
 
+    @ExceptionHandler(OccupiedLoginException::class)
+    fun handleOccupiedLoginException(
+        exception: OccupiedLoginException,
+        request: HttpServletRequest
+    ): ResponseEntity<ValidationExceptionResponse> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ValidationExceptionResponse(
+                errors = listOf(
+                    ValidationExceptionResponse.ValidationErrorDto(
+                        objectName = exception.javaClass.toString(),
+                        exception = exception.javaClass.canonicalName,
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
+                    )
+                )
+            )
+        )
+    }
+
     @ExceptionHandler(EntityNotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundException(

@@ -23,4 +23,10 @@ class RegistrationController(private val signUpService: SignUpService) : Registr
             .status(HttpStatus.OK)
             .body(signUpService.signOut(authentication))
     }
+
+    override fun confirmUser(confirmCode: String): ResponseEntity<HttpStatus> {
+        signUpService.confirm(confirmCode)
+        return ResponseEntity.status(HttpStatus.OK).build()
+    }
+
 }

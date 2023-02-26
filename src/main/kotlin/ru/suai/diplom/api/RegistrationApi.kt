@@ -1,19 +1,20 @@
 package ru.suai.diplom.api
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.http.MediaType
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import ru.suai.diplom.dto.request.SignUpForm
 import ru.suai.diplom.dto.response.SignUpResponse
 import javax.validation.Valid
+
 
 @Schema(name = "Registration Controller", description = "sign up")
 @RequestMapping("taxi-aggregator/api/")
@@ -28,8 +29,8 @@ interface RegistrationApi {
     )
     @PostMapping(
         value = ["/signUp"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-        consumes = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [APPLICATION_JSON_VALUE],
+        consumes = [APPLICATION_JSON_VALUE]
     )
     fun signUp(@Valid @RequestBody form: SignUpForm): ResponseEntity<SignUpResponse>
 
@@ -44,4 +45,18 @@ interface RegistrationApi {
         value = ["/signOut"]
     )
     fun signOut(authentication: Authentication?): ResponseEntity<Any>
+
+    @Operation(summary = "Подтверждение пользователя")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "Пользователь подтверждён",
+            content = [Content(schema = Schema(implementation = HttpStatus::class))]
+        ), ApiResponse(responseCode = "400", description = "Код подтверждения не существует")]
+    )
+    @GetMapping(value = ["/confirm/{confirm-code}"], produces = [APPLICATION_JSON_VALUE])
+    fun confirmUser(
+        @Parameter(description = "confirmation code") @PathVariable("confirm-code") confirmCode: String
+    ): ResponseEntity<HttpStatus>
+
 }
