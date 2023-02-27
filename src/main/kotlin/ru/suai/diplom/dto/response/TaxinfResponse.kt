@@ -6,7 +6,7 @@ data class TaxinfParametrs(
     val id: Long,
     val name: String,
     val logotype: String,
-    val price: Int,
+    val price: Double,
     val currency: String,
     @SerializedName("button_text")
     val buttonText: String,

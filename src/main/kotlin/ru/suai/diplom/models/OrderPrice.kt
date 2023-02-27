@@ -13,7 +13,7 @@ open class OrderPrice(
     @JoinColumn(name = "route_id", nullable = false)
     open var route: Route,
     @OneToMany(mappedBy = "price")
-    open var price: MutableSet<Price>,
+    open var price: MutableSet<Price>? = null,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

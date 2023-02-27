@@ -8,6 +8,7 @@ import javax.validation.constraints.Email
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
+@Schema(description = "Форма для регистрации пользователя")
 data class SignUpForm(
     @Schema(description = "Имя")
     @field:NotBlank

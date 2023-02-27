@@ -8,7 +8,7 @@ open class Price(
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "date_time")
     open var dateTime: Date,
-    open var price: Int,
+    open var price: Double,
     @ManyToOne
     @JoinColumn(name = "route_id", nullable = false)
     open var route: Route,
