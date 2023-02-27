@@ -6,18 +6,23 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import org.hibernate.validator.constraints.Length
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import ru.suai.diplom.dto.request.SignUpForm
 import ru.suai.diplom.dto.response.SignUpResponse
 import javax.validation.Valid
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
 
 
+@Validated
 @Schema(name = "Registration Controller", description = "sign up")
-@RequestMapping("taxi-aggregator/api/")
+@RequestMapping("api/")
 interface RegistrationApi {
     @Operation(summary = "Регистрация")
     @ApiResponses(
@@ -56,7 +61,7 @@ interface RegistrationApi {
     )
     @GetMapping(value = ["/confirm/{confirm-code}"], produces = [APPLICATION_JSON_VALUE])
     fun confirmUser(
-        @Parameter(description = "confirmation code") @PathVariable("confirm-code") confirmCode: String
+        @Valid @NotEmpty @Parameter(description = "confirmation code") @PathVariable("confirm-code") confirmCode: String
     ): ResponseEntity<HttpStatus>
 
 }

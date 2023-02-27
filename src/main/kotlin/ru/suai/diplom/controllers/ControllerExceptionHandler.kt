@@ -18,6 +18,7 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 import javax.servlet.http.HttpServletRequest
+import javax.validation.ConstraintViolationException
 
 
 @RestControllerAdvice
@@ -268,4 +269,25 @@ class ControllerExceptionHandler {
             )
         )
     }
+
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun constraintViolationException(exception: ConstraintViolationException, request: HttpServletRequest): ResponseEntity<ValidationExceptionResponse> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ValidationExceptionResponse(
+                errors = listOf(
+                    ValidationExceptionResponse.ValidationErrorDto(
+                        objectName = exception.javaClass.toString(),
+                        exception = exception.javaClass.canonicalName,
+                        message = exception.message,
+                        path = request.requestURI.toString(),
+                        timestamp = DateTimeFormatter
+                            .ofPattern(dateFormat)
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now())
+                    )
+                )
+            )
+        )
+    }
+
 }
