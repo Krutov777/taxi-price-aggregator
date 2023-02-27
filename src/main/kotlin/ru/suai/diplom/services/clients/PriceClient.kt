@@ -9,11 +9,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 
 import org.springframework.stereotype.Component
+import ru.suai.diplom.dto.response.TaxiPriceResponse
 import ru.suai.diplom.dto.response.TaxinfResponse
 import ru.suai.diplom.dto.response.YandexResponse
 import ru.suai.diplom.utils.constants.GlobalConstants.BASE_URL_TAXINF
 import ru.suai.diplom.utils.constants.GlobalConstants.BASE_URL_YANDEX
 import ru.suai.diplom.utils.unescapeUnicode
+import javax.annotation.PostConstruct
 
 @Component
 class PriceClient(
@@ -68,5 +70,46 @@ class PriceClient(
                 TaxinfResponse::class.java
             ).also { logger.info("successful request for Taxinf:  $it") }
         }
+    }
+
+    fun getTaxiPrices(
+        longitudeFromParam: Double,
+        latitudeFromParam: Double,
+        longitudeBeforeParam: Double,
+        latitudeBeforeParam: Double
+    ): MutableList<TaxiPriceResponse> {
+        val taxinfResponse: TaxinfResponse = getPriceOtherTaxi(
+            longitudeFrom = longitudeFromParam,
+            latitudeFrom = latitudeFromParam,
+            longitudeBefore = longitudeBeforeParam,
+            latitudeBefore = latitudeBeforeParam
+        )
+
+        val yandexResponse: YandexResponse = getPriceYandex(
+            longitudeFrom = longitudeFromParam,
+            latitudeFrom = latitudeFromParam,
+            longitudeBefore = longitudeBeforeParam,
+            latitudeBefore = latitudeBeforeParam
+        )
+
+        val taxiPricesResponse: MutableList<TaxiPriceResponse> = mutableListOf(
+            TaxiPriceResponse(
+                nameTaxi = "Яндекс",
+                price = yandexResponse.options[0].price,
+                currency = yandexResponse.currency
+            )
+        )
+        for (taxinfElem in taxinfResponse.prices) {
+            if (taxinfElem.name != "Яндекс") {
+                taxiPricesResponse.add(
+                    TaxiPriceResponse(
+                        nameTaxi = taxinfElem.name,
+                        price = taxinfElem.price,
+                        currency = taxinfElem.currency
+                    )
+                )
+            }
+        }
+        return taxiPricesResponse
     }
 }
