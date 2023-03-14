@@ -7,8 +7,8 @@ import javax.persistence.*
 open class Price(
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "date_time")
-    open var dateTime: Date,
-    open var price: Double,
+    open var dateTime: Date? = null,
+    open var price: Double? = null,
     @ManyToOne
     @JoinColumn(name = "route_id", nullable = false)
     open var route: Route,
@@ -17,7 +17,7 @@ open class Price(
     open var taxi: Taxi,
     @ManyToOne
     @JoinColumn(name = "order_price_id", nullable = true)
-    open var orderPrice: OrderPrice?,
+    open var orderPrice: OrderPrice? = null,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

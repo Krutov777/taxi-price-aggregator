@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.hibernate.validator.constraints.Length
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*
 import ru.suai.diplom.dto.request.SignUpForm
 import ru.suai.diplom.dto.response.SignUpResponse
 import javax.validation.Valid
-import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
 
 
@@ -33,7 +31,7 @@ interface RegistrationApi {
         ), ApiResponse(responseCode = "400", description = "Ошибка при регистрации")]
     )
     @PostMapping(
-        value = ["/signUp"],
+        value = ["/signup"],
         produces = [APPLICATION_JSON_VALUE],
         consumes = [APPLICATION_JSON_VALUE]
     )
@@ -47,7 +45,7 @@ interface RegistrationApi {
         ), ApiResponse(responseCode = "400", description = "Ошибка при logout")]
     )
     @PostMapping(
-        value = ["/signOut"]
+        value = ["/signout"]
     )
     fun signOut(authentication: Authentication?): ResponseEntity<Any>
 

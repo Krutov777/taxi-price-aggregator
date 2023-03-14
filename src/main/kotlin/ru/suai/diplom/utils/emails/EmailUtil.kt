@@ -24,7 +24,7 @@ class EmailUtil(
 ) {
 
 
-    private val confirmMailTemplate = "confirm_mail.ftlh"
+    private val confirmMailTemplate = "confirmation.ftlh"
 
     fun sendMail(user: User, subject: String?) {
         val preparator = MimeMessagePreparator { mimeMessage: MimeMessage? ->
@@ -32,7 +32,7 @@ class EmailUtil(
             messageHelper.setSubject(subject.toString())
             messageHelper.setText(getEmailContent(user), true)
             messageHelper.setTo(user.email.toString())
-            messageHelper.setFrom(from.toString())
+            messageHelper.setFrom(from)
         }
         mailSender.send(preparator)
     }

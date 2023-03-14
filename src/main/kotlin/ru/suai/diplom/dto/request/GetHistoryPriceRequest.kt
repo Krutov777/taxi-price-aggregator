@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
 @Schema(description = "Форма для получения цен такси")
-data class PostHistoryPriceRequest(
+data class GetHistoryPriceRequest(
     @Schema(description = "Адрес 'Откуда'")
     @field:NotBlank
     var fromAddress: String,

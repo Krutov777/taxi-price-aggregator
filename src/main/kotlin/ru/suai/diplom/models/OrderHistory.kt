@@ -10,7 +10,7 @@ open class OrderHistory(
     open var status: Status,
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "date_time")
-    open var dateTime: Date,
+    open var dateTime: Date? = null,
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     open var user: User,

@@ -8,7 +8,7 @@ import javax.persistence.*
 open class OrderPrice(
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "date_time")
-    open var dateTime: Date,
+    open var dateTime: Date? = null,
     @ManyToOne
     @JoinColumn(name = "route_id", nullable = false)
     open var route: Route,

@@ -1,6 +1,7 @@
 package ru.suai.diplom.dto.response
 
 import io.swagger.v3.oas.annotations.media.Schema
+import java.util.*
 
 @Schema(description = "Цена на такси")
 data class TaxiPriceResponse(
@@ -10,4 +11,6 @@ data class TaxiPriceResponse(
     var price: Double? = null,
     @Schema(description = "Валюта")
     var currency: String? = null,
+    @Schema(description = "Дата-время")
+    var dateTime: Date? = null
 )

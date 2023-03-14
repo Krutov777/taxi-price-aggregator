@@ -8,6 +8,6 @@
 </head>
 <body>
 <div style="margin-top: 10px"> <h1>Уважаемый, ${user.firstName}</h1></div>
-<h2>Пройдите для подтверждения регистрации по ссылке <a href="localhost/taxi-aggregator/api/confirm/${user.confirmCode}">ссылка</a></h2>
+<h2>Пройдите для подтверждения регистрации по ссылке <a href="localhost/api/confirm/${user.confirmCode}">ссылка</a></h2>
 </body>
 </html>
