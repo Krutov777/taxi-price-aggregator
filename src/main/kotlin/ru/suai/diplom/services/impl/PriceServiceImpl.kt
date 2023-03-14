@@ -88,7 +88,8 @@ class PriceServiceImpl(
                         route = route,
                         taxi = taxiRepository.findByName(taxinfElem.nameTaxi ?: "") ?: Taxi(),
                         orderPrice = orderPrice,
-                        price = taxinfElem.price ?: 0.0
+                        price = taxinfElem.price ?: 0.0,
+                        currency = taxinfElem.currency
                     )
                 )
             }
@@ -142,20 +143,16 @@ class PriceServiceImpl(
                     )
                     orderHistoryRepository.save(orderHistory)
                     for (taxinfElem in taxinfResponse) {
-                        if (taxiRepository.findByName(taxinfElem.nameTaxi ?: "") == null) {
-                            taxiRepository.save(
-                                Taxi(
-                                    name = taxinfElem.nameTaxi
-                                )
-                            )
-                        }
+                        if (taxiRepository.findByName(taxinfElem.nameTaxi ?: "") == null)
+                            taxiRepository.save(Taxi(name = taxinfElem.nameTaxi))
                         if (taxinfElem.price != null && taxinfElem.nameTaxi != null) {
                             priceRepository.save(
                                 Price(
                                     dateTime = taxinfResponse[0].dateTime,
                                     route = route,
                                     taxi = taxiRepository.findByName(taxinfElem.nameTaxi ?: "") ?: Taxi(),
-                                    price = taxinfElem.price ?: 0.0
+                                    price = taxinfElem.price ?: 0.0,
+                                    currency = taxinfElem.currency
                                 )
                             )
                         }
@@ -199,7 +196,8 @@ class PriceServiceImpl(
 //                            dateTime = taxinfResponse[0].dateTime,
 //                            route = itemOrderHistory.route,
 //                            taxi = taxiRepository.findByName(taxinfElem.nameTaxi ?: "") ?: Taxi(),
-//                            price = taxinfElem.price ?: 0.0
+//                            price = taxinfElem.price ?: 0.0,
+//                            currency = taxinfElem.currency
 //                        )
 //                    )
 //                }
@@ -236,9 +234,8 @@ class PriceServiceImpl(
             val priceList = mutableListOf<Price?>()
             channel.consumeEach {
                 priceList.add(it)
-                if (orderHistory.size * 4 == priceList.size) {
+                if (orderHistory.size * 4 == priceList.size)
                     channel.close()
-                }
             }
             priceRepository.saveAll(priceList.mapNotNull { it })
         }
@@ -268,7 +265,8 @@ class PriceServiceImpl(
                                 dateTime = taxinfResponse[0].dateTime,
                                 route = itemOrderHistory.route,
                                 taxi = taxiRepository.findByName(taxinfElem.nameTaxi ?: "") ?: Taxi(),
-                                price = taxinfElem.price ?: 0.0
+                                price = taxinfElem.price ?: 0.0,
+                                currency = taxinfElem.currency
                             )
                         )
                     }

@@ -35,16 +35,18 @@ class PriceClient(
         latitudeFrom: Double,
         longitudeBefore: Double,
         latitudeBefore: Double
-    ): YandexResponse {
-        urlYandex = "$urlYandex&rll=$longitudeFrom,$latitudeFrom~$longitudeBefore,$latitudeBefore"
+    ): YandexResponse? {
+        val urlYandexRequest = "$urlYandex&rll=$longitudeFrom,$latitudeFrom~$longitudeBefore,$latitudeBefore"
         val request = Request.Builder()
-            .url(urlYandex)
+            .url(urlYandexRequest)
             .build()
         return client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                logger.warn("Unexpected code $response")
-                throw IOException("Unexpected code $response")
-            }
+            if (!response.isSuccessful)
+                return null.also { logger.info("Unexpected code $response")}
+            logger.info(request.toString())
+            val responseBody = response.body?.string()
+            if (responseBody.isNullOrEmpty())
+                return null.also { logger.info("successful request for Yandex taxi with empty body: $response")}
             return@use gson.fromJson(
                 response.body?.string(),
                 YandexResponse::class.java
@@ -58,7 +60,7 @@ class PriceClient(
         longitudeBefore: Double,
         latitudeBefore: Double,
         userAgent: String = GlobalConstants.userAgent[(0..999).random()]
-    ): TaxinfResponse {
+    ): TaxinfResponse? {
         val urlTaxinf = "$BASE_URL_TAXINF&from_geo=$latitudeFrom,$longitudeFrom&to_geo=$latitudeBefore,$longitudeBefore"
         val request = Request.Builder()
             .url(urlTaxinf)
@@ -70,9 +72,10 @@ class PriceClient(
                 return getPriceOtherTaxi(longitudeFrom, latitudeFrom, longitudeBefore, latitudeBefore, userAgent = GlobalConstants.userAgent[(0..999).random()])
             if (!response.isSuccessful) {
                 logger.warn("Unexpected code $response")
-                return getPriceOtherTaxi(longitudeFrom, latitudeFrom, longitudeBefore, latitudeBefore, userAgent = GlobalConstants.userAgent[(0..999).random()])
+                return null
             }
 
+            logger.info(request.toString())
             return@use gson.fromJson(
                 response.body?.string()?.unescapeUnicode(),
                 TaxinfResponse::class.java
@@ -87,14 +90,14 @@ class PriceClient(
         longitudeBeforeParam: Double,
         latitudeBeforeParam: Double
     ): List<TaxiPriceResponse> = withContext(Dispatchers.IO) {
-        val taxinfResponse: TaxinfResponse = getPriceOtherTaxi(
+        val taxinfResponse: TaxinfResponse? = getPriceOtherTaxi(
             longitudeFrom = longitudeFromParam,
             latitudeFrom = latitudeFromParam,
             longitudeBefore = longitudeBeforeParam,
             latitudeBefore = latitudeBeforeParam
         )
 
-        val yandexResponse: YandexResponse = getPriceYandex(
+        val yandexResponse: YandexResponse? = getPriceYandex(
             longitudeFrom = longitudeFromParam,
             latitudeFrom = latitudeFromParam,
             longitudeBefore = longitudeBeforeParam,
@@ -102,24 +105,29 @@ class PriceClient(
         )
         val curDateTime = Date()
 
-        val taxiPricesResponse: MutableList<TaxiPriceResponse> = mutableListOf(
-            TaxiPriceResponse(
-                nameTaxi = "Яндекс",
-                price = yandexResponse.options[0].price,
-                currency = yandexResponse.currency,
-                dateTime = curDateTime
-            )
-        )
-        for (taxinfElem in taxinfResponse.prices) {
-            if (taxinfElem.name != "Яндекс") {
-                taxiPricesResponse.add(
-                    TaxiPriceResponse(
-                        nameTaxi = taxinfElem.name,
-                        price = taxinfElem.price,
-                        currency = taxinfElem.currency,
-                        dateTime = curDateTime
-                    )
+        val taxiPricesResponse: MutableList<TaxiPriceResponse> = mutableListOf()
+        if (yandexResponse != null) {
+            taxiPricesResponse.add(
+                TaxiPriceResponse(
+                    nameTaxi = "Яндекс",
+                    price = yandexResponse.options[0].price,
+                    currency = yandexResponse.currency,
+                    dateTime = curDateTime
                 )
+            )
+        }
+        if (taxinfResponse != null) {
+            for (taxinfElem in taxinfResponse.prices) {
+                if (taxinfElem.name != "Яндекс") {
+                    taxiPricesResponse.add(
+                        TaxiPriceResponse(
+                            nameTaxi = taxinfElem.name,
+                            price = taxinfElem.price,
+                            currency = if (taxinfElem.currency == "₽") "RUB" else taxinfElem.currency,
+                            dateTime = curDateTime
+                        )
+                    )
+                }
             }
         }
         return@withContext taxiPricesResponse
@@ -131,39 +139,43 @@ class PriceClient(
         longitudeBeforeParam: Double,
         latitudeBeforeParam: Double
     ): List<TaxiPriceResponse> {
-        val taxinfResponse: TaxinfResponse = getPriceOtherTaxi(
+        val taxinfResponse: TaxinfResponse? = getPriceOtherTaxi(
             longitudeFrom = longitudeFromParam,
             latitudeFrom = latitudeFromParam,
             longitudeBefore = longitudeBeforeParam,
             latitudeBefore = latitudeBeforeParam
         )
 
-        val yandexResponse: YandexResponse = getPriceYandex(
+        val yandexResponse: YandexResponse? = getPriceYandex(
             longitudeFrom = longitudeFromParam,
             latitudeFrom = latitudeFromParam,
             longitudeBefore = longitudeBeforeParam,
             latitudeBefore = latitudeBeforeParam
         )
         val curDateTime = Date()
-
-        val taxiPricesResponse: MutableList<TaxiPriceResponse> = mutableListOf(
-            TaxiPriceResponse(
-                nameTaxi = "Яндекс",
-                price = yandexResponse.options[0].price,
-                currency = yandexResponse.currency,
-                dateTime = curDateTime
-            )
-        )
-        for (taxinfElem in taxinfResponse.prices) {
-            if (taxinfElem.name != "Яндекс") {
-                taxiPricesResponse.add(
-                    TaxiPriceResponse(
-                        nameTaxi = taxinfElem.name,
-                        price = taxinfElem.price,
-                        currency = taxinfElem.currency,
-                        dateTime = curDateTime
-                    )
+        val taxiPricesResponse: MutableList<TaxiPriceResponse> = mutableListOf()
+        if (yandexResponse != null) {
+            taxiPricesResponse.add(
+                TaxiPriceResponse(
+                    nameTaxi = "Яндекс",
+                    price = yandexResponse.options[0].price,
+                    currency = yandexResponse.currency,
+                    dateTime = curDateTime
                 )
+            )
+        }
+        if (taxinfResponse != null) {
+            for (taxinfElem in taxinfResponse.prices) {
+                if (taxinfElem.name != "Яндекс") {
+                    taxiPricesResponse.add(
+                        TaxiPriceResponse(
+                            nameTaxi = taxinfElem.name,
+                            price = taxinfElem.price,
+                            currency = if (taxinfElem.currency == "₽") "RUB" else taxinfElem.currency,
+                            dateTime = curDateTime
+                        )
+                    )
+                }
             }
         }
         return taxiPricesResponse

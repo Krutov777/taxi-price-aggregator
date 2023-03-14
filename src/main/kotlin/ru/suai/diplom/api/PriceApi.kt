@@ -34,11 +34,11 @@ interface PriceApi {
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getPricesTaxi(
         @Valid @NotBlank @Length(
-            min = 10,
+            min = 3,
             max = 256
         ) @Parameter(description = "Адрес 'Откуда'") @RequestParam("fromAddress") fromAddress: String,
         @Valid @NotBlank @Length(
-            min = 10,
+            min = 3,
             max = 256
         ) @Parameter(description = "Адрес 'Куда'") @RequestParam("toAddress") toAddress: String,
         @NotNull @Parameter(description = "Долгота 'Откуда'") @RequestParam("longitudeFrom") longitudeFrom: Double,

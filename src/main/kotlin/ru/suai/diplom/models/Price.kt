@@ -9,6 +9,7 @@ open class Price(
     @Column(name = "date_time")
     open var dateTime: Date? = null,
     open var price: Double? = null,
+    open var currency: String? = null,
     @ManyToOne
     @JoinColumn(name = "route_id", nullable = false)
     open var route: Route,
