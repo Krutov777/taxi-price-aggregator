@@ -10,10 +10,10 @@ import org.hibernate.validator.constraints.Length
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.*
+import ru.suai.diplom.dto.request.addOrderHistoryRequest
 import ru.suai.diplom.dto.response.TaxiPriceResponse
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
@@ -46,4 +46,20 @@ interface PriceApi {
         @NotNull @Parameter(description = "Долгота 'Куда'") @RequestParam("longitudeTo") longitudeTo: Double,
         @NotNull @Parameter(description = "Широта 'Куда'") @RequestParam("latitudeTo") latitudeTo: Double,
     ): ResponseEntity<List<TaxiPriceResponse>>
+
+    @Operation(summary = "Добавление заказа истории цен")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "201",
+            description = "Успешно заказана история цен на такси",
+            content = [Content(schema = Schema(implementation = HttpStatus::class))]
+        ),
+            ApiResponse(responseCode = "400", description = "Ошибка заказе истории цен на такси"),
+            ApiResponse(responseCode = "401", description = "Не авторизованы"),
+            ApiResponse(responseCode = "403", description = "Нет прав доступа"),
+            ApiResponse(responseCode = "404", description = "Не найдено")
+        ]
+    )
+    @PostMapping
+    fun addOrderHistoryPrice(@Valid @RequestBody addOrderHistoryRequest: addOrderHistoryRequest, authentication: Authentication?): ResponseEntity<HttpStatus>
 }
