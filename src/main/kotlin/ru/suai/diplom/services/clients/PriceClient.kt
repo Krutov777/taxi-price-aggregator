@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okio.IOException
 import okio.use
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -48,7 +47,7 @@ class PriceClient(
             if (responseBody.isNullOrEmpty())
                 return null.also { logger.info("successful request for Yandex taxi with empty body: $response")}
             return@use gson.fromJson(
-                response.body?.string(),
+                responseBody,
                 YandexResponse::class.java
             ).also { logger.info("successful request for Yandex taxi:  $it") }
         }
@@ -70,10 +69,8 @@ class PriceClient(
         val response = client.newCall(request).execute().use { response ->
             if (response.code == 429)
                 return getPriceOtherTaxi(longitudeFrom, latitudeFrom, longitudeBefore, latitudeBefore, userAgent = GlobalConstants.userAgent[(0..999).random()])
-            if (!response.isSuccessful) {
-                logger.warn("Unexpected code $response")
-                return null
-            }
+            if (!response.isSuccessful)
+                return null.also {logger.warn("Unexpected code $response")}
 
             logger.info(request.toString())
             return@use gson.fromJson(
@@ -104,7 +101,6 @@ class PriceClient(
             latitudeBefore = latitudeBeforeParam
         )
         val curDateTime = Date()
-
         val taxiPricesResponse: MutableList<TaxiPriceResponse> = mutableListOf()
         if (yandexResponse != null) {
             taxiPricesResponse.add(
@@ -112,7 +108,8 @@ class PriceClient(
                     nameTaxi = "Яндекс",
                     price = yandexResponse.options[0].price,
                     currency = yandexResponse.currency,
-                    dateTime = curDateTime
+                    dateTime = curDateTime,
+                    dateTimeNumber = curDateTime.time
                 )
             )
         }
@@ -124,7 +121,8 @@ class PriceClient(
                             nameTaxi = taxinfElem.name,
                             price = taxinfElem.price,
                             currency = if (taxinfElem.currency == "₽") "RUB" else taxinfElem.currency,
-                            dateTime = curDateTime
+                            dateTime = curDateTime,
+                            dateTimeNumber = curDateTime.time
                         )
                     )
                 }
@@ -160,7 +158,8 @@ class PriceClient(
                     nameTaxi = "Яндекс",
                     price = yandexResponse.options[0].price,
                     currency = yandexResponse.currency,
-                    dateTime = curDateTime
+                    dateTime = curDateTime,
+                    dateTimeNumber = curDateTime.time
                 )
             )
         }
@@ -172,7 +171,8 @@ class PriceClient(
                             nameTaxi = taxinfElem.name,
                             price = taxinfElem.price,
                             currency = if (taxinfElem.currency == "₽") "RUB" else taxinfElem.currency,
-                            dateTime = curDateTime
+                            dateTime = curDateTime,
+                            dateTimeNumber = curDateTime.time
                         )
                     )
                 }
