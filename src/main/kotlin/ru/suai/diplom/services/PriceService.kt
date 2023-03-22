@@ -2,7 +2,9 @@ package ru.suai.diplom.services
 
 import org.springframework.security.core.Authentication
 import ru.suai.diplom.dto.request.addOrderHistoryRequest
+import ru.suai.diplom.dto.response.HistoryPriceResponse
 import ru.suai.diplom.dto.response.TaxiPriceResponse
+import ru.suai.diplom.dto.response.TaxiPricesResponse
 
 interface PriceService {
     fun getCurrentPrices(
@@ -12,7 +14,7 @@ interface PriceService {
         latitudeFrom: Double,
         longitudeTo: Double,
         latitudeTo: Double
-    ): List<TaxiPriceResponse>
+    ): TaxiPricesResponse
 
     fun addOrderHistoryPrice(
         addOrderHistoryRequest: addOrderHistoryRequest,
@@ -24,7 +26,7 @@ interface PriceService {
         latitudeFrom: Double,
         longitudeTo: Double,
         latitudeTo: Double
-    ): List<List<TaxiPriceResponse>>
+    ): HistoryPriceResponse
 
     fun getHistoryPrice(
         authentication: Authentication?

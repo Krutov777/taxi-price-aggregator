@@ -9,7 +9,9 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.stereotype.Service
 import ru.suai.diplom.dto.request.addOrderHistoryRequest
+import ru.suai.diplom.dto.response.HistoryPriceResponse
 import ru.suai.diplom.dto.response.TaxiPriceResponse
+import ru.suai.diplom.dto.response.TaxiPricesResponse
 import ru.suai.diplom.exceptions.UserNotFoundException
 import ru.suai.diplom.models.*
 import ru.suai.diplom.repositories.*
@@ -41,7 +43,7 @@ class PriceServiceImpl(
         latitudeFrom: Double,
         longitudeTo: Double,
         latitudeTo: Double
-    ): List<TaxiPriceResponse> = runBlocking {
+    ): TaxiPricesResponse = runBlocking {
         val routeList: List<Route> = routeRepository.findAll(
             fromLatitude = latitudeFrom,
             fromLongitude = longitudeFrom,
@@ -74,13 +76,8 @@ class PriceServiceImpl(
         )
         orderPriceRepository.save(orderPrice)
         for (taxinfElem in taxinfResponse) {
-            if (taxiRepository.findByName(taxinfElem.nameTaxi ?: "") == null) {
-                taxiRepository.save(
-                    Taxi(
-                        name = taxinfElem.nameTaxi
-                    )
-                )
-            }
+            if (taxiRepository.findByName(taxinfElem.nameTaxi ?: "") == null)
+                taxiRepository.save(Taxi(name = taxinfElem.nameTaxi))
             if (taxinfElem.price != null && taxinfElem.nameTaxi != null) {
                 priceRepository.save(
                     Price(
@@ -94,7 +91,7 @@ class PriceServiceImpl(
                 )
             }
         }
-        return@runBlocking taxinfResponse
+        return@runBlocking TaxiPricesResponse(taxinfResponse)
     }
 
     @Transactional
@@ -111,10 +108,10 @@ class PriceServiceImpl(
             }
                 ?.let {
                     val routeList: List<Route> = routeRepository.findAll(
-                        fromLatitude = addOrderHistoryRequest.latitudeFrom,
-                        fromLongitude = addOrderHistoryRequest.longitudeFrom,
-                        toLatitude = addOrderHistoryRequest.latitudeTo,
-                        toLongitude = addOrderHistoryRequest.longitudeTo
+                        fromLatitude = addOrderHistoryRequest.latitudeFrom!!,
+                        fromLongitude = addOrderHistoryRequest.longitudeFrom!!,
+                        toLatitude = addOrderHistoryRequest.latitudeTo!!,
+                        toLongitude = addOrderHistoryRequest.longitudeTo!!
                     )
                     val route = if (routeList.isEmpty()) {
                         routeRepository.save(
@@ -130,10 +127,10 @@ class PriceServiceImpl(
                     } else routeList[0]
 
                     val taxinfResponse: List<TaxiPriceResponse> = priceClient.getTaxiPrices(
-                        latitudeFromParam = addOrderHistoryRequest.latitudeFrom,
-                        longitudeFromParam = addOrderHistoryRequest.longitudeFrom,
-                        latitudeBeforeParam = addOrderHistoryRequest.latitudeTo,
-                        longitudeBeforeParam = addOrderHistoryRequest.longitudeTo
+                        latitudeFromParam = addOrderHistoryRequest.latitudeFrom!!,
+                        longitudeFromParam = addOrderHistoryRequest.longitudeFrom!!,
+                        latitudeBeforeParam = addOrderHistoryRequest.latitudeTo!!,
+                        longitudeBeforeParam = addOrderHistoryRequest.longitudeTo!!
                     )
                     val orderHistory = OrderHistory(
                         dateTime = taxinfResponse[0].dateTime,
@@ -166,8 +163,27 @@ class PriceServiceImpl(
         latitudeFrom: Double,
         longitudeTo: Double,
         latitudeTo: Double
-    ): List<List<TaxiPriceResponse>> {
-        TODO("Not yet implemented")
+    ): HistoryPriceResponse {
+        val routeList: List<Route> = routeRepository.findAll(
+            fromLatitude = latitudeFrom,
+            fromLongitude = longitudeFrom,
+            toLatitude = latitudeTo,
+            toLongitude = longitudeTo
+        )
+        return if (routeList.isNotEmpty()) {
+            val priceHistory = priceRepository.findByRoute(routeList[0])
+            if (priceHistory.isEmpty())
+                return HistoryPriceResponse(mapOf())
+            val priceHistoryTaxiPriceResponse: List<TaxiPriceResponse> = priceHistory.map { TaxiPriceResponse(
+                nameTaxi = it.taxi.name,
+                price = it.price,
+                currency = it.currency,
+                dateTime = it.dateTime,
+                dateTimeNumber = it.dateTime?.time
+            ) }
+            return HistoryPriceResponse(priceHistoryTaxiPriceResponse.groupBy { it.dateTimeNumber ?: 0 })
+
+        } else HistoryPriceResponse(mapOf())
     }
 
     override fun getHistoryPrice(authentication: Authentication?): List<TaxiPriceResponse> {
@@ -222,7 +238,7 @@ class PriceServiceImpl(
 //}
 
 
-    @Scheduled(fixedDelay = 60*60*1000) // each hour
+    @Scheduled(fixedDelay = 60*1000) // each hour
     fun countHistoryPrice() = runBlocking {
         val scope = CoroutineScope(SupervisorJob())
         val channel: Channel<Price?> = Channel()
