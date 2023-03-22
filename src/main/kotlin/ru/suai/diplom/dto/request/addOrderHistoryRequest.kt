@@ -8,25 +8,27 @@ import javax.validation.constraints.NotNull
 data class addOrderHistoryRequest(
     @Schema(description = "Адрес 'Откуда'")
     @field:NotBlank
-    var fromAddress: String,
+    @field:NotNull
+    var fromAddress: String? = null,
 
     @Schema(description = "Адрес 'Куда'")
     @field:NotBlank
-    var toAddress: String,
+    @field:NotNull
+    var toAddress: String? = null,
 
     @Schema(description = "Долгота 'Откуда'")
     @field:NotNull
-    var longitudeFrom: Double,
+    var longitudeFrom: Double? = null,
 
     @Schema(description = "Широта 'Откуда'")
     @field:NotNull
-    var latitudeFrom: Double,
+    var latitudeFrom: Double? = null,
 
     @Schema(description = "Долгота 'Куда'")
     @field:NotNull
-    var latitudeTo: Double,
+    var latitudeTo: Double? = null,
 
     @Schema(description = "Широта 'Куда'")
     @field:NotNull
-    var longitudeTo: Double
+    var longitudeTo: Double? = null,
 )

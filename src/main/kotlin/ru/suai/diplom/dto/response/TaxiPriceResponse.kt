@@ -12,5 +12,7 @@ data class TaxiPriceResponse(
     @Schema(description = "Валюта")
     var currency: String? = null,
     @Schema(description = "Дата-время")
-    var dateTime: Date? = null
+    var dateTime: Date? = null,
+    @Schema(description = "Дата-время в виде числа")
+    var dateTimeNumber: Long? = null
 )
