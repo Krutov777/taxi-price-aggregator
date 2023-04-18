@@ -64,7 +64,7 @@ class PriceServiceImpl(
         } else routeList[0]
 //        delay(10000)
 
-        val taxinfResponse: List<TaxiPriceResponse> = priceClient.getTaxiPrices(
+        val taxinfResponse: List<TaxiPriceResponse> = priceClient.getTaxiPricesAsync(
             latitudeFromParam = latitudeFrom,
             longitudeFromParam = longitudeFrom,
             latitudeBeforeParam = latitudeTo,
@@ -98,7 +98,7 @@ class PriceServiceImpl(
     override fun addOrderHistoryPrice(
         addOrderHistoryRequest: addOrderHistoryRequest,
         authentication: Authentication?
-    ) {
+    ): Unit = runBlocking {
         if (authentication == null) {
             throw object : AuthenticationException(GlobalConstants.UNAUTHORIZED) {}
         } else {
@@ -126,7 +126,7 @@ class PriceServiceImpl(
                         )
                     } else routeList[0]
 
-                    val taxinfResponse: List<TaxiPriceResponse> = priceClient.getTaxiPrices(
+                    val taxinfResponse: List<TaxiPriceResponse> = priceClient.getTaxiPricesAsync(
                         latitudeFromParam = addOrderHistoryRequest.latitudeFrom!!,
                         longitudeFromParam = addOrderHistoryRequest.longitudeFrom!!,
                         latitudeBeforeParam = addOrderHistoryRequest.latitudeTo!!,
@@ -186,8 +186,33 @@ class PriceServiceImpl(
         } else HistoryPriceResponse(mapOf())
     }
 
-    override fun getHistoryPrice(authentication: Authentication?): List<TaxiPriceResponse> {
-        TODO("Not yet implemented")
+    override fun getHistoryPrice(authentication: Authentication?): HistoryPriceResponse {
+        if (authentication == null) {
+            throw object : AuthenticationException(GlobalConstants.UNAUTHORIZED) {}
+        } else {
+            val userDetails = authentication.principal as? UserDetails
+            userDetails?.username?.let {
+                userRepository.findByEmail(it) ?: throw UserNotFoundException(GlobalConstants.USER_NOT_FOUND)
+            }
+                ?.let { it ->
+                    val routeList: List<Route> = orderHistoryRepository.findAll(userId = it.id ?: 0).map { it.route }
+                    return if (routeList.isNotEmpty()) {
+                        val priceHistory = priceRepository.findByRoute(routeList[0])
+                        if (priceHistory.isEmpty())
+                            return HistoryPriceResponse(mapOf())
+                        val priceHistoryTaxiPriceResponse: List<TaxiPriceResponse> = priceHistory.map { TaxiPriceResponse(
+                            nameTaxi = it.taxi.name,
+                            price = it.price,
+                            currency = it.currency,
+                            dateTime = it.dateTime,
+                            dateTimeNumber = it.dateTime?.time
+                        ) }
+                        return HistoryPriceResponse(priceHistoryTaxiPriceResponse.groupBy { it.dateTimeNumber ?: 0 })
+
+                    } else HistoryPriceResponse(mapOf())
+                }
+            return HistoryPriceResponse(mapOf())
+        }
     }
 
 
@@ -238,7 +263,7 @@ class PriceServiceImpl(
 //}
 
 
-    @Scheduled(fixedDelay = 60*1000) // each hour
+    @Scheduled(fixedDelay = 60*60*1000) // each hour
     fun countHistoryPrice() = runBlocking {
         val scope = CoroutineScope(SupervisorJob())
         val channel: Channel<Price?> = Channel()
@@ -250,7 +275,7 @@ class PriceServiceImpl(
             val priceList = mutableListOf<Price?>()
             channel.consumeEach {
                 priceList.add(it)
-                if (orderHistory.size * 4 == priceList.size)
+                if (orderHistory.size * 3 == priceList.size)
                     channel.close()
             }
             priceRepository.saveAll(priceList.mapNotNull { it })
@@ -258,7 +283,7 @@ class PriceServiceImpl(
 
         val handler = CoroutineExceptionHandler { _, exception ->
             scope.launch {
-                repeat(4) {
+                repeat(3) {
                     channel.send(null)
                 }
             }

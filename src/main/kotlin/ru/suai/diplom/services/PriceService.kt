@@ -3,7 +3,6 @@ package ru.suai.diplom.services
 import org.springframework.security.core.Authentication
 import ru.suai.diplom.dto.request.addOrderHistoryRequest
 import ru.suai.diplom.dto.response.HistoryPriceResponse
-import ru.suai.diplom.dto.response.TaxiPriceResponse
 import ru.suai.diplom.dto.response.TaxiPricesResponse
 
 interface PriceService {
@@ -30,6 +29,6 @@ interface PriceService {
 
     fun getHistoryPrice(
         authentication: Authentication?
-    ): List<TaxiPriceResponse>
+    ): HistoryPriceResponse
 
 }

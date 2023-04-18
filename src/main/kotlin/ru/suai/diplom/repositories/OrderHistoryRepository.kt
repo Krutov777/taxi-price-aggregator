@@ -12,4 +12,10 @@ interface OrderHistoryRepository : JpaRepository<OrderHistory, Long> {
         nativeQuery = true
     )
     fun findAll(status: String) : List<OrderHistory>
+
+    @Query(
+        value = "select * from order_history where user_id = ?1",
+        nativeQuery = true
+    )
+    fun findAll(userId: Long) : List<OrderHistory>
 }

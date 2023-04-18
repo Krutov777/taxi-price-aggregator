@@ -24,17 +24,22 @@ class PriceController(
     ): ResponseEntity<TaxiPricesResponse> {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(priceService.getCurrentPrices(
-                fromAddress = fromAddress,
-                toAddress = toAddress,
-                longitudeFrom = longitudeFrom,
-                latitudeFrom = latitudeFrom,
-                longitudeTo = longitudeTo,
-                latitudeTo = latitudeTo
-            ))
+            .body(
+                priceService.getCurrentPrices(
+                    fromAddress = fromAddress,
+                    toAddress = toAddress,
+                    longitudeFrom = longitudeFrom,
+                    latitudeFrom = latitudeFrom,
+                    longitudeTo = longitudeTo,
+                    latitudeTo = latitudeTo
+                )
+            )
     }
 
-    override fun addOrderHistoryPrice(addOrderHistoryRequest: addOrderHistoryRequest, authentication: Authentication?): ResponseEntity<HttpStatus> {
+    override fun addOrderHistoryPrice(
+        addOrderHistoryRequest: addOrderHistoryRequest,
+        authentication: Authentication?
+    ): ResponseEntity<HttpStatus> {
         priceService.addOrderHistoryPrice(addOrderHistoryRequest, authentication)
         return ResponseEntity.status(HttpStatus.OK).build()
     }
@@ -47,11 +52,19 @@ class PriceController(
     ): ResponseEntity<HistoryPriceResponse> {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(priceService.getHistoryPrice(
-                longitudeFrom = longitudeFrom,
-                latitudeFrom = latitudeFrom,
-                longitudeTo = longitudeTo,
-                latitudeTo = latitudeTo
-            ))
+            .body(
+                priceService.getHistoryPrice(
+                    longitudeFrom = longitudeFrom,
+                    latitudeFrom = latitudeFrom,
+                    longitudeTo = longitudeTo,
+                    latitudeTo = latitudeTo
+                )
+            )
+    }
+
+    override fun getHistoryPriceByAuthentication(authentication: Authentication?): ResponseEntity<HistoryPriceResponse> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(priceService.getHistoryPrice(authentication))
     }
 }

@@ -79,4 +79,17 @@ interface PriceApi {
         @Valid @NotNull @Parameter(description = "Долгота 'Куда'") @RequestParam("longitudeTo") longitudeTo: Double,
         @Valid @NotNull @Parameter(description = "Широта 'Куда'") @RequestParam("latitudeTo") latitudeTo: Double,
     ): ResponseEntity<HistoryPriceResponse>
+
+    @Operation(summary = "Получение истории цен на такси для пользователя")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "История цен на такси успешно получена",
+            content = [Content(schema = Schema(implementation = HistoryPriceResponse::class))]
+        ), ApiResponse(responseCode = "400", description = "Ошибка при получении истории цен на такси")]
+    )
+    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE], value = ["/history_user"])
+    fun getHistoryPriceByAuthentication(
+        authentication: Authentication?
+    ): ResponseEntity<HistoryPriceResponse>
 }
