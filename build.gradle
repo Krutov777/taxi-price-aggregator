@@ -22,10 +22,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'com.auth0:java-jwt:4.3.0'
-	implementation("org.springdoc:springdoc-openapi-ui:1.6.14")
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.14'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	//email
-	implementation("org.springframework.boot:spring-boot-starter-mail")
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 	//freemarker
 	implementation 'org.freemarker:freemarker:2.3.28'
@@ -36,13 +37,16 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 
 	//http client
-	implementation"com.squareup.okhttp3:okhttp:4.10.0"
+	implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 
 	//serialization
 	implementation 'com.google.code.gson:gson:2.10.1'
 
 	//coroutines
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-Beta")
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-Beta'
+
+	//thymeleaf
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

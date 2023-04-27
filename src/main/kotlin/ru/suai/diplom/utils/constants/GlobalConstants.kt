@@ -11,6 +11,7 @@ object GlobalConstants {
     const val OCCUPIED_LOGIN = "Пользователь с таким login-ом уже существует"
     const val PASSWORDS_DONT_MATCH = "Пароли не совпадают"
     const val UNAUTHORIZED = "Вы не авторизированы"
+    const val RESET_PASSWORD_TOKEN_EXPIRES_DATE: Long = 24 * 60 * 60 * 1000 //24 hours
     val userAgent = listOf("Mediapartners-Google",
         "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0",
         "serpstatbot/2.0 beta (advanced backlink tracking bot; http://serpstatbot.com/; abuse@serpstatbot.com)",

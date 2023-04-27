@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.RestController
 import ru.suai.diplom.api.RegistrationApi
+import ru.suai.diplom.dto.request.ResetPasswordRequest
 import ru.suai.diplom.dto.request.SignUpForm
 import ru.suai.diplom.dto.response.SignUpResponse
 import ru.suai.diplom.services.SignUpService
@@ -28,5 +29,16 @@ class RegistrationController(private val signUpService: SignUpService) : Registr
         signUpService.confirm(confirmCode)
         return ResponseEntity.status(HttpStatus.OK).build()
     }
+
+    override fun createLinkForResetPassword(email: String): ResponseEntity<HttpStatus> {
+        signUpService.createLinkForResetPassword(email)
+        return ResponseEntity.status(HttpStatus.OK).build()
+    }
+
+    override fun updatePassword(resetPasswordRequest: ResetPasswordRequest): ResponseEntity<HttpStatus> {
+        signUpService.updatePassword(resetPasswordRequest)
+        return ResponseEntity.status(HttpStatus.OK).build()
+    }
+
 
 }

@@ -22,15 +22,15 @@ class EmailUtil(
     @Value("\${spring.mail.username}")
     private val from: String,
 ) {
-
+    private val resetPasswordMailTemplate = "resetPassword.ftlh"
 
     private val confirmMailTemplate = "confirmation.ftlh"
 
-    fun sendMail(user: User, subject: String?) {
+    fun sendLinkForConfirmUser(user: User, subject: String?) {
         val preparator = MimeMessagePreparator { mimeMessage: MimeMessage? ->
             val messageHelper = MimeMessageHelper(mimeMessage)
             messageHelper.setSubject(subject.toString())
-            messageHelper.setText(getEmailContent(user), true)
+            messageHelper.setText(getEmailContentForConfirmUser(user), true)
             messageHelper.setTo(user.email.toString())
             messageHelper.setFrom(from)
         }
@@ -38,12 +38,33 @@ class EmailUtil(
     }
 
     @Throws(IOException::class, TemplateException::class)
-    fun getEmailContent(user: User): String {
+    fun getEmailContentForConfirmUser(user: User): String {
         val stringWriter = StringWriter()
         val model: MutableMap<String, Any> = HashMap()
         model["user"] = user
         configuration.getTemplate(confirmMailTemplate).process(model, stringWriter)
         return stringWriter.buffer.toString()
+    }
+
+    @Throws(IOException::class, TemplateException::class)
+    fun getEmailContentForResetPassword(user: User, token: String): String {
+        val stringWriter = StringWriter()
+        val model: MutableMap<String, Any> = HashMap()
+        model["token"] = token
+        model["user"] = user
+        configuration.getTemplate(resetPasswordMailTemplate).process(model, stringWriter)
+        return stringWriter.buffer.toString()
+    }
+
+    fun sendLinkForResetPassword(user: User, token: String, subject: String?) {
+        val preparator = MimeMessagePreparator { mimeMessage: MimeMessage? ->
+            val messageHelper = MimeMessageHelper(mimeMessage)
+            messageHelper.setSubject(subject.toString())
+            messageHelper.setText(getEmailContentForResetPassword(user, token), true)
+            messageHelper.setTo(user.email.toString())
+            messageHelper.setFrom(from)
+        }
+        mailSender.send(preparator)
     }
 }
 
