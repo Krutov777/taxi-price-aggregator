@@ -25,11 +25,6 @@ class JwtUtilImpl(
         private const val REFRESH_TOKEN_EXPIRES_TIME: Long = 24 * 60 * 60 * 1000 // 24 HOURS
     }
 
-    data class ParsedToken(
-        val email: String? = null,
-        val role: String? = null
-    ) {}
-
     override fun generateTokens(subject: String, authority: String, issuer: String): MutableMap<String, String> {
         val algorithm = Algorithm.HMAC256(secret.toByteArray(StandardCharsets.UTF_8))
         val accessToken = JWT.create()
@@ -64,13 +59,13 @@ class JwtUtilImpl(
     }
 
     @Throws(JWTVerificationException::class)
-    private fun parse(token: String): ParsedToken {
+    override fun parse(token: String): JwtUtil.ParsedToken {
         val algorithm = Algorithm.HMAC256(secret.toByteArray(StandardCharsets.UTF_8))
         val jwtVerifier = JWT.require(algorithm).build()
         val decodedJWT = jwtVerifier.verify(token)
         val email = decodedJWT.subject
         val role = decodedJWT.getClaim("role").asString()
-        return ParsedToken(
+        return JwtUtil.ParsedToken(
             role = role,
             email = email
         )

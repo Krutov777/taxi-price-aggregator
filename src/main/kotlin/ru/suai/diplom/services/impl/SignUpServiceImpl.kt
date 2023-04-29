@@ -16,6 +16,8 @@ import ru.suai.diplom.repositories.PasswordTokenRepository
 import ru.suai.diplom.repositories.RefreshTokenRepository
 import ru.suai.diplom.repositories.UserRepository
 import ru.suai.diplom.security.details.UserDetails
+import ru.suai.diplom.security.repositories.BlackListRepository
+import ru.suai.diplom.security.repositories.WhiteListRepository
 import ru.suai.diplom.services.SignUpService
 import ru.suai.diplom.utils.constants.GlobalConstants.OCCUPIED_EMAIL
 import ru.suai.diplom.utils.constants.GlobalConstants.OCCUPIED_LOGIN
@@ -33,7 +35,9 @@ class SignUpServiceImpl(
     private val userRepository: UserRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val passwordTokenRepository: PasswordTokenRepository,
-    private val emailUtil: EmailUtil
+    private val emailUtil: EmailUtil,
+    private val whiteListRepository: WhiteListRepository,
+    private val blackListRepository: BlackListRepository
 ) : SignUpService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -114,13 +118,16 @@ class SignUpServiceImpl(
         logger.info(resetPasswordRequest.toString())
         val result = validatePasswordResetToken(resetPasswordRequest.token)
         if (result != null)
-            return throw ResetPasswordTokenException(result)
+            throw ResetPasswordTokenException(result)
         val user = passwordTokenRepository.findByToken(resetPasswordRequest.token ?: "")?.user
         if (user != null) {
+            val whiteList = whiteListRepository.findByEmail(user.email ?: "")
+            if (whiteList != null)
+                blackListRepository.save(whiteList[0], whiteList[1])
             changeUserPassword(user, resetPasswordRequest.newPassword)
         }
         else
-            return throw UserNotFoundException("Пользователя с таким токеном восстановления пароля не существует")
+            throw UserNotFoundException("Пользователя с таким токеном восстановления пароля не существует")
 
     }
 

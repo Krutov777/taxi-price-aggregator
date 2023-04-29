@@ -6,12 +6,12 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.stereotype.Component
-import ru.suai.diplom.models.RefreshToken
-import ru.suai.diplom.models.User
 import ru.suai.diplom.repositories.RefreshTokenRepository
 import ru.suai.diplom.repositories.UserRepository
 import ru.suai.diplom.security.authentication.RefreshTokenAuthentication
 import ru.suai.diplom.security.details.UserDetails
+import ru.suai.diplom.security.repositories.BlackListRepository
+import ru.suai.diplom.security.repositories.WhiteListRepository
 import ru.suai.diplom.security.utils.AuthorizationHeaderUtil
 import ru.suai.diplom.security.utils.JwtUtil
 import java.io.IOException
@@ -27,7 +27,9 @@ class JwtTokenAuthenticationFilter(
     private val authorizationHeaderUtil: AuthorizationHeaderUtil,
     private val authenticationConfiguration: AuthenticationConfiguration,
     private val userRepository: UserRepository,
-    private val refreshTokenRepository: RefreshTokenRepository
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val blacklistRepository: BlackListRepository,
+    private val whiteListRepository: WhiteListRepository
 ) : UsernamePasswordAuthenticationFilter(authenticationConfiguration.authenticationManager) {
 
     companion object {
@@ -42,9 +44,12 @@ class JwtTokenAuthenticationFilter(
 
     @Throws(AuthenticationException::class)
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
+        val refreshToken = authorizationHeaderUtil.getToken(request)
         return if (
-            hasRefreshToken(request) &&
-            refreshTokenRepository.findByToken(authorizationHeaderUtil.getToken(request)) != null
+            hasRefreshToken(request) && whiteListRepository.existsByRefreshToken(
+                refreshToken,
+                jwtUtil.parse(refreshToken).email.toString()
+            )
         ) {
             val refreshTokenAuthentication = RefreshTokenAuthentication(authorizationHeaderUtil.getToken(request))
             super.getAuthenticationManager().authenticate(refreshTokenAuthentication)
@@ -81,23 +86,17 @@ class JwtTokenAuthenticationFilter(
         response.contentType = "application/json"
 
         val email = userDetails.username
+        val whiteList = whiteListRepository.findByEmail(email ?: "")
+        if (whiteList != null) {
+            blacklistRepository.save(whiteList[0], whiteList[1])
+        }
         val tokenJson: Map<String, String> = jwtUtil.generateTokens(
             email!!,
             userDetails.authorities.iterator().next()!!.authority,
             request.requestURL.toString()
         )
 
-        val token = tokenJson["refreshToken"]
-        val user: User = userRepository.findByEmail(email) ?: User()
-        val refreshToken: RefreshToken = RefreshToken(
-            token = token,
-            user = user
-        )
-        if (refreshTokenRepository.findByUserEmail(email) != null) {
-            refreshTokenRepository.findByUserEmail(email)!!.id?.let { refreshTokenRepository.deleteById(it) }
-            refreshTokenRepository.save(refreshToken)
-        }
-        refreshTokenRepository.save(refreshToken)
+        whiteListRepository.save(tokenJson["accessToken"]!!, tokenJson["refreshToken"]!!, email)
         objectMapper.writeValue(response.outputStream, tokenJson)
     }
 

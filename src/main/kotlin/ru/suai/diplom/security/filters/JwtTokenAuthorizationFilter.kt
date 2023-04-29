@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import ru.suai.diplom.security.filters.JwtTokenAuthenticationFilter.Companion.AUTHENTICATION_URL
+import ru.suai.diplom.security.repositories.BlackListRepository
 import ru.suai.diplom.security.utils.AuthorizationHeaderUtil
 import ru.suai.diplom.security.utils.JwtUtil
 import java.io.IOException
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletResponse
 class JwtTokenAuthorizationFilter(
     var jwtUtil: JwtUtil,
     var authorizationHeaderUtil: AuthorizationHeaderUtil,
+    private val blackListRepository: BlackListRepository
 ) : OncePerRequestFilter() {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -34,6 +36,8 @@ class JwtTokenAuthorizationFilter(
         } else {
             if (authorizationHeaderUtil.hasAuthorizationToken(request)) {
                 val jwt: String = authorizationHeaderUtil.getToken(request)
+                if (blackListRepository.exists(jwt))
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
                 try {
                     val authenticationToken: Authentication = jwtUtil.buildAuthentication(jwt)
                     SecurityContextHolder.getContext().authentication = authenticationToken

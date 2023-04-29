@@ -15,20 +15,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import ru.suai.diplom.security.filters.JwtTokenAuthenticationFilter
 import ru.suai.diplom.security.filters.JwtTokenAuthorizationFilter
 
+
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 class JwtSecurityConfiguration(
     var userDetailsServiceImpl: UserDetailsService,
     var refreshTokenAuthenticationProvider: AuthenticationProvider,
-    var passwordEncoder: PasswordEncoder
+    var passwordEncoder: PasswordEncoder,
 ) {
-
     @Bean
     @Throws(Exception::class)
     fun securityFilterChain(
         httpSecurity: HttpSecurity,
-        jwtAuthenticationFilter: JwtTokenAuthenticationFilter?,
-        jwtAuthorizationFilter: JwtTokenAuthorizationFilter?
+        jwtAuthenticationFilter: JwtTokenAuthenticationFilter,
+        jwtAuthorizationFilter: JwtTokenAuthorizationFilter
     ): SecurityFilterChain {
         httpSecurity.csrf().disable()
         httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
