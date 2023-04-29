@@ -29,7 +29,10 @@ interface RegistrationApi {
             responseCode = "201",
             description = "Пользователь зарегистрирован",
             content = [Content(mediaType = "application/json", schema = Schema(implementation = SignUpResponse::class))]
-        ), ApiResponse(responseCode = "400", description = "Ошибка при регистрации")]
+        ),
+            ApiResponse(responseCode = "400", description = "Ошибка при регистрации"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
+        ]
     )
     @PostMapping(
         value = ["/signup"],
@@ -43,7 +46,10 @@ interface RegistrationApi {
         value = [ApiResponse(
             responseCode = "200",
             description = "Пользователь вышел из аккаунта"
-        ), ApiResponse(responseCode = "400", description = "Ошибка при logout")]
+        ),
+            ApiResponse(responseCode = "400", description = "Ошибка при logout"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
+        ]
     )
     @PostMapping(
         value = ["/signout"]
@@ -56,7 +62,10 @@ interface RegistrationApi {
             responseCode = "200",
             description = "Пользователь подтверждён",
             content = [Content(schema = Schema(implementation = HttpStatus::class))]
-        ), ApiResponse(responseCode = "400", description = "Код подтверждения не существует")]
+        ),
+            ApiResponse(responseCode = "400", description = "Код подтверждения не существует"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
+        ]
     )
     @GetMapping(value = ["/confirm/{confirm-code}"], produces = [APPLICATION_JSON_VALUE])
     fun confirmUser(
@@ -69,7 +78,10 @@ interface RegistrationApi {
             responseCode = "200",
             description = "Ссылка на смену пароля отправлена",
             content = [Content(schema = Schema(implementation = HttpStatus::class))]
-        ), ApiResponse(responseCode = "400", description = "Не удалось отправить ссылку на восстановление пароля для данного email адреса")]
+        ),
+            ApiResponse(responseCode = "400", description = "Не удалось отправить ссылку на восстановление пароля для данного email адреса"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
+        ]
     )
     @PostMapping(value = ["/user/reset_password"], produces = [APPLICATION_JSON_VALUE])
     fun createLinkForResetPassword(
@@ -82,7 +94,10 @@ interface RegistrationApi {
             responseCode = "200",
             description = "Пароль успешно изменен",
             content = [Content(schema = Schema(implementation = HttpStatus::class))]
-        ), ApiResponse(responseCode = "400", description = "Не удалось изменить пароль")]
+        ),
+            ApiResponse(responseCode = "400", description = "Не удалось изменить пароль"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
+        ]
     )
     @PutMapping(value = ["/user/update_password"], produces = [APPLICATION_JSON_VALUE])
     fun updatePassword(

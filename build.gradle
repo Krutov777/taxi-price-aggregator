@@ -1,15 +1,16 @@
 plugins {
-	id 'org.springframework.boot' version '2.7.8'
+	id 'org.springframework.boot' version '2.7.9'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 
 	id 'org.jetbrains.kotlin.jvm' version '1.8.0'
 	id 'org.jetbrains.kotlin.plugin.spring' version '1.8.0'
 	id 'org.jetbrains.kotlin.plugin.jpa' version '1.8.0'
+
 }
 
 group = 'ru.suai'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
@@ -47,6 +48,24 @@ dependencies {
 
 	//thymeleaf
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+//	//REDIS
+//	//https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter
+//	implementation 'org.redisson:redisson-spring-boot-starter:3.17.0'
+
+	//Bucket4J starter = Bucket4J + JCache
+	//https://mvnrepository.com/artifact/com.giffing.bucket4j.spring.boot.starter/bucket4j-spring-boot-starter
+	implementation ('com.giffing.bucket4j.spring.boot.starter:bucket4j-spring-boot-starter:0.5.2')
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-cache
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// https://mvnrepository.com/artifact/redis.clients/jedis
+	implementation 'redis.clients:jedis:4.2.0'
+
 
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

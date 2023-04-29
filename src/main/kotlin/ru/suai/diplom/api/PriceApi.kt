@@ -30,7 +30,10 @@ interface PriceApi {
             responseCode = "200",
             description = "Цены на такси успешно получены",
             content = [Content(schema = Schema(implementation = TaxiPricesResponse::class))]
-        ), ApiResponse(responseCode = "400", description = "Ошибка при получении цен на такси")]
+        ),
+            ApiResponse(responseCode = "400", description = "Ошибка при получении цен на такси"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
+        ]
     )
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getPricesTaxi(
@@ -58,7 +61,8 @@ interface PriceApi {
             ApiResponse(responseCode = "400", description = "Ошибка заказе истории цен на такси"),
             ApiResponse(responseCode = "401", description = "Не авторизованы"),
             ApiResponse(responseCode = "403", description = "Нет прав доступа"),
-            ApiResponse(responseCode = "404", description = "Не найдено")
+            ApiResponse(responseCode = "404", description = "Не найдено"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
         ]
     )
     @PostMapping
@@ -70,7 +74,10 @@ interface PriceApi {
             responseCode = "200",
             description = "История цен на такси успешно получена",
             content = [Content(schema = Schema(implementation = HistoryPriceResponse::class))]
-        ), ApiResponse(responseCode = "400", description = "Ошибка при получении истории цен на такси")]
+        ),
+            ApiResponse(responseCode = "400", description = "Ошибка при получении истории цен на такси"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
+        ]
     )
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE], value = ["/history"])
     fun getHistoryPrice(
@@ -86,7 +93,10 @@ interface PriceApi {
             responseCode = "200",
             description = "История цен на такси успешно получена",
             content = [Content(schema = Schema(implementation = HistoryPriceResponse::class))]
-        ), ApiResponse(responseCode = "400", description = "Ошибка при получении истории цен на такси")]
+        ),
+            ApiResponse(responseCode = "400", description = "Ошибка при получении истории цен на такси"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
+        ]
     )
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE], value = ["/history_user"])
     fun getHistoryPriceByAuthentication(
