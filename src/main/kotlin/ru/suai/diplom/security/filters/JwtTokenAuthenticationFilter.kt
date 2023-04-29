@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.stereotype.Component
-import ru.suai.diplom.repositories.RefreshTokenRepository
 import ru.suai.diplom.repositories.UserRepository
 import ru.suai.diplom.security.authentication.RefreshTokenAuthentication
 import ru.suai.diplom.security.details.UserDetails
@@ -26,8 +25,6 @@ class JwtTokenAuthenticationFilter(
     private val jwtUtil: JwtUtil,
     private val authorizationHeaderUtil: AuthorizationHeaderUtil,
     private val authenticationConfiguration: AuthenticationConfiguration,
-    private val userRepository: UserRepository,
-    private val refreshTokenRepository: RefreshTokenRepository,
     private val blacklistRepository: BlackListRepository,
     private val whiteListRepository: WhiteListRepository
 ) : UsernamePasswordAuthenticationFilter(authenticationConfiguration.authenticationManager) {

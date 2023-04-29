@@ -13,7 +13,6 @@ import ru.suai.diplom.exceptions.*
 import ru.suai.diplom.models.PasswordResetToken
 import ru.suai.diplom.models.User
 import ru.suai.diplom.repositories.PasswordTokenRepository
-import ru.suai.diplom.repositories.RefreshTokenRepository
 import ru.suai.diplom.repositories.UserRepository
 import ru.suai.diplom.security.details.UserDetails
 import ru.suai.diplom.security.repositories.BlackListRepository
@@ -33,7 +32,6 @@ import javax.transaction.Transactional
 @Service
 class SignUpServiceImpl(
     private val userRepository: UserRepository,
-    private val refreshTokenRepository: RefreshTokenRepository,
     private val passwordTokenRepository: PasswordTokenRepository,
     private val emailUtil: EmailUtil,
     private val whiteListRepository: WhiteListRepository,
@@ -73,9 +71,10 @@ class SignUpServiceImpl(
         } else {
             val userDetails = authentication.principal as? UserDetails
             val email: String? = userDetails?.username
-            email?.let { userRepository.findByEmail(it) ?: throw UserNotFoundException(USER_NOT_FOUND) }
-                ?.let { refreshTokenRepository.deleteByUser(it) }
-            return "Произведен успешный выход из аккаунта - $email" ?: ""
+            val whiteList = whiteListRepository.findByEmail(email ?: "")
+            if (whiteList != null)
+                blackListRepository.save(whiteList[0], whiteList[1])
+            return "Произведен успешный выход из аккаунта - $email"
         }
     }
 
