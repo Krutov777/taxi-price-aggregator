@@ -21,7 +21,7 @@ import javax.validation.constraints.NotEmpty
 
 @Validated
 @Schema(name = "Registration Controller", description = "sign up")
-@RequestMapping("api/")
+@RequestMapping("taxi-aggregator/api/")
 interface RegistrationApi {
     @Operation(summary = "Регистрация")
     @ApiResponses(

@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull
 
 @Validated
 @Schema(name = "Price Controller")
-@RequestMapping("api/prices")
+@RequestMapping("taxi-aggregator/api/prices")
 interface PriceApi {
     @Operation(summary = "Получение цен на такси")
     @ApiResponses(
