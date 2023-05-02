@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import ru.suai.diplom.security.filters.JwtTokenAuthenticationFilter
 import ru.suai.diplom.security.filters.JwtTokenAuthorizationFilter
 
@@ -30,7 +33,7 @@ class JwtSecurityConfiguration(
         jwtAuthenticationFilter: JwtTokenAuthenticationFilter,
         jwtAuthorizationFilter: JwtTokenAuthorizationFilter
     ): SecurityFilterChain {
-        httpSecurity.csrf().disable()
+        httpSecurity.cors().and().csrf().disable()
         httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         httpSecurity.authorizeRequests()
             .antMatchers("/**").permitAll()
@@ -38,6 +41,22 @@ class JwtSecurityConfiguration(
         httpSecurity.addFilter(jwtAuthenticationFilter)
         httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter::class.java)
         return httpSecurity.build()
+    }
+
+    // To enable CORS
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        val allowedOriginsUrl: MutableList<String> = ArrayList()
+        allowedOriginsUrl.add("http://localhost:8081/")
+        allowedOriginsUrl.add("http://192.168.1.2:8081/")
+        configuration.allowedOrigins = allowedOriginsUrl // www - obligatory
+        configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
+        configuration.allowCredentials = true
+        configuration.allowedHeaders = listOf("Authorization", "Cache-Control", "Content-Type")
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
     }
 
     @Autowired

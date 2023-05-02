@@ -36,13 +36,15 @@ class JwtTokenAuthorizationFilter(
         } else {
             if (authorizationHeaderUtil.hasAuthorizationToken(request)) {
                 val jwt: String = authorizationHeaderUtil.getToken(request)
-                if (blackListRepository.exists(jwt))
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                try {
-                    val authenticationToken: Authentication = jwtUtil.buildAuthentication(jwt)
-                    SecurityContextHolder.getContext().authentication = authenticationToken
-                    filterChain.doFilter(request, response)
-                } catch (e: JWTVerificationException) {
+                return try {
+                    if (blackListRepository.exists(jwt)) {
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+                    } else {
+                        val authenticationToken: Authentication = jwtUtil.buildAuthentication(jwt)
+                        SecurityContextHolder.getContext().authentication = authenticationToken
+                        filterChain.doFilter(request, response)
+                    }
+                } catch (e: Exception) {
                     log.info(e.message)
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
                 }

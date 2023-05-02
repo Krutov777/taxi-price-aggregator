@@ -42,15 +42,20 @@ class JwtTokenAuthenticationFilter(
     @Throws(AuthenticationException::class)
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
         val refreshToken = authorizationHeaderUtil.getToken(request)
-        return if (
-            hasRefreshToken(request) && whiteListRepository.existsByRefreshToken(
-                refreshToken,
-                jwtUtil.parse(refreshToken).email.toString()
-            )
-        ) {
-            val refreshTokenAuthentication = RefreshTokenAuthentication(authorizationHeaderUtil.getToken(request))
-            super.getAuthenticationManager().authenticate(refreshTokenAuthentication)
-        } else {
+        return try {
+            return if (
+                hasRefreshToken(request) && whiteListRepository.existsByRefreshToken(
+                    refreshToken,
+                    jwtUtil.parse(refreshToken).email.toString()
+                )
+            ) {
+                val refreshTokenAuthentication = RefreshTokenAuthentication(authorizationHeaderUtil.getToken(request))
+                super.getAuthenticationManager().authenticate(refreshTokenAuthentication)
+            } else {
+                super.attemptAuthentication(request, response)
+            }
+        }
+        catch (e: Exception) {
             super.attemptAuthentication(request, response)
         }
     }
