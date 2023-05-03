@@ -6,10 +6,8 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.stereotype.Component
-import ru.suai.diplom.repositories.UserRepository
 import ru.suai.diplom.security.authentication.RefreshTokenAuthentication
 import ru.suai.diplom.security.details.UserDetails
-import ru.suai.diplom.security.repositories.BlackListRepository
 import ru.suai.diplom.security.repositories.WhiteListRepository
 import ru.suai.diplom.security.utils.AuthorizationHeaderUtil
 import ru.suai.diplom.security.utils.JwtUtil
@@ -25,7 +23,6 @@ class JwtTokenAuthenticationFilter(
     private val jwtUtil: JwtUtil,
     private val authorizationHeaderUtil: AuthorizationHeaderUtil,
     private val authenticationConfiguration: AuthenticationConfiguration,
-    private val blacklistRepository: BlackListRepository,
     private val whiteListRepository: WhiteListRepository
 ) : UsernamePasswordAuthenticationFilter(authenticationConfiguration.authenticationManager) {
 
@@ -88,10 +85,6 @@ class JwtTokenAuthenticationFilter(
         response.contentType = "application/json"
 
         val email = userDetails.username
-        val whiteList = whiteListRepository.findByEmail(email ?: "")
-        if (whiteList != null) {
-            blacklistRepository.save(whiteList[0], whiteList[1])
-        }
         val tokenJson: Map<String, String> = jwtUtil.generateTokens(
             email!!,
             userDetails.authorities.iterator().next()!!.authority,

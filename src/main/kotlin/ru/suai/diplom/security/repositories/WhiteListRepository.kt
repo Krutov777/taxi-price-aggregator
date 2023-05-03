@@ -6,4 +6,8 @@ interface WhiteListRepository {
     fun findByEmail(email: String): List<String>?
 
     fun existsByRefreshToken(refreshToken: String, email: String): Boolean
+
+    fun exists(token: String, email: String): Boolean
+
+    fun delete(email: String)
 }

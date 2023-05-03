@@ -15,7 +15,6 @@ import ru.suai.diplom.models.User
 import ru.suai.diplom.repositories.PasswordTokenRepository
 import ru.suai.diplom.repositories.UserRepository
 import ru.suai.diplom.security.details.UserDetails
-import ru.suai.diplom.security.repositories.BlackListRepository
 import ru.suai.diplom.security.repositories.WhiteListRepository
 import ru.suai.diplom.services.SignUpService
 import ru.suai.diplom.utils.constants.GlobalConstants.OCCUPIED_EMAIL
@@ -23,7 +22,6 @@ import ru.suai.diplom.utils.constants.GlobalConstants.OCCUPIED_LOGIN
 import ru.suai.diplom.utils.constants.GlobalConstants.PASSWORDS_DONT_MATCH
 import ru.suai.diplom.utils.constants.GlobalConstants.RESET_PASSWORD_TOKEN_EXPIRES_DATE
 import ru.suai.diplom.utils.constants.GlobalConstants.UNAUTHORIZED
-import ru.suai.diplom.utils.constants.GlobalConstants.USER_NOT_FOUND
 import ru.suai.diplom.utils.emails.EmailUtil
 import java.util.*
 import javax.transaction.Transactional
@@ -35,7 +33,6 @@ class SignUpServiceImpl(
     private val passwordTokenRepository: PasswordTokenRepository,
     private val emailUtil: EmailUtil,
     private val whiteListRepository: WhiteListRepository,
-    private val blackListRepository: BlackListRepository
 ) : SignUpService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -71,9 +68,7 @@ class SignUpServiceImpl(
         } else {
             val userDetails = authentication.principal as? UserDetails
             val email: String? = userDetails?.username
-            val whiteList = whiteListRepository.findByEmail(email ?: "")
-            if (whiteList != null)
-                blackListRepository.save(whiteList[0], whiteList[1])
+            whiteListRepository.delete(email.toString())
             return "Произведен успешный выход из аккаунта - $email"
         }
     }
@@ -120,9 +115,7 @@ class SignUpServiceImpl(
             throw ResetPasswordTokenException(result)
         val user = passwordTokenRepository.findByToken(resetPasswordRequest.token ?: "")?.user
         if (user != null) {
-            val whiteList = whiteListRepository.findByEmail(user.email ?: "")
-            if (whiteList != null)
-                blackListRepository.save(whiteList[0], whiteList[1])
+            whiteListRepository.delete(user.email.toString())
             changeUserPassword(user, resetPasswordRequest.newPassword)
         }
         else

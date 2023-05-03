@@ -21,4 +21,16 @@ class WhiteListRepositoryRedisImpl(
     override fun existsByRefreshToken(refreshToken: String, email: String): Boolean {
         return redisTemplate.opsForValue().get(email)?.get(1) == refreshToken
     }
+
+    override fun exists(token: String, email: String): Boolean {
+        val pairToken: List<String>? = redisTemplate.opsForValue().get(email)
+        if (pairToken != null)
+            if (pairToken[0] == token || pairToken[1] == token)
+                return true
+        return false
+    }
+
+    override fun delete(email: String) {
+        redisTemplate.delete(email)
+    }
 }

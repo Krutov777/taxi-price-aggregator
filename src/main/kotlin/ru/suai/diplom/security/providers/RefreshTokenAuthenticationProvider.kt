@@ -8,24 +8,23 @@ import org.springframework.security.core.AuthenticationException
 import org.springframework.stereotype.Component
 import ru.suai.diplom.exceptions.RefreshTokenException
 import ru.suai.diplom.security.authentication.RefreshTokenAuthentication
-import ru.suai.diplom.security.repositories.BlackListRepository
+import ru.suai.diplom.security.repositories.WhiteListRepository
 import ru.suai.diplom.security.utils.JwtUtil
 
 
 @Component
 class RefreshTokenAuthenticationProvider(
     private var jwtUtil: JwtUtil,
-    private val blacklistRepository: BlackListRepository
+    private val whiteListRepository: WhiteListRepository
 ) : AuthenticationProvider {
     private val log = LoggerFactory.getLogger(javaClass)
 
     @Throws(AuthenticationException::class)
     override fun authenticate(authentication: Authentication): Authentication {
         val token = authentication.credentials as String
-        if (blacklistRepository.exists(token)) {
+        if (!whiteListRepository.exists(token, jwtUtil.parse(token).email.toString())) {
             throw RefreshTokenException("Token was revoked")
         }
-
         return try {
             jwtUtil.buildAuthentication(token)
         } catch (e: JWTVerificationException) {
