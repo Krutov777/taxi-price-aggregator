@@ -110,7 +110,7 @@
                         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
                             <tr>
                                 <td align="center" valign="top" style="padding: 36px 24px;">
-                                    <a rel='opener' href="http://localhost/user/change_password?token=${token}" target="_blank"
+                                    <a rel='opener' href="http://localhost/taxi-aggregator/user/change_password?token=${token}" target="_blank"
                                        style="display: inline-block;">
                                         <img src="https://nypost.com/wp-content/uploads/sites/2/2015/09/the_thinker_chimp-41.jpg?quality=75&amp;strip=all&amp;w=1024"
                                              alt="Logo" border="0" width="192"
@@ -172,7 +172,7 @@
                                                     <tr>
                                                         <td align="center" bgcolor="#1a82e2"
                                                             style="border-radius: 6px;">
-                                                            <a rel='opener' href="http://localhost/user/change_password?token=${token}" target="_blank"
+                                                            <a rel='opener' href="http://localhost/taxi-aggregator/user/change_password?token=${token}" target="_blank"
                                                                style="display: inline-block; padding: 16px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px;">
                                                                 Восстановить пароль</a>
                                                         </td>
@@ -188,7 +188,7 @@
                                     style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;">
                                     <p style="margin: 0;">Если это не сработает, скопируйте и вставьте следующую ссылку в
                                                                                                   ваш браузер:</p>
-                                    <p style="margin: 0;"><a rel='opener' href="http://localhost/user/change_password?token=${token}" target="_blank">http://localhost/user/change_password?token=${token}</a>
+                                    <p style="margin: 0;"><a rel='opener' href="http://localhost/taxi-aggregator/user/change_password?token=${token}" target="_blank">http://localhost/taxi-aggregator/user/change_password?token=${token}</a>
                                     </p>
                                 </td>
                             </tr>

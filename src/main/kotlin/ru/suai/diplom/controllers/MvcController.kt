@@ -10,7 +10,7 @@ import ru.suai.diplom.services.SignUpService
 
 @Controller
 class MvcController(private val signUpService: SignUpService) {
-    @GetMapping("/user/change_password")
+    @GetMapping("/taxi-aggregator/user/change_password")
     fun showChangePasswordPage(
         model: ModelMap,
         @RequestParam("token") token: String
