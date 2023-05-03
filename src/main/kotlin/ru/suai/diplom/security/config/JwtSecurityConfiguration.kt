@@ -12,6 +12,10 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.firewall.HttpFirewall
+import org.springframework.security.web.firewall.HttpStatusRequestRejectedHandler
+import org.springframework.security.web.firewall.RequestRejectedHandler
+import org.springframework.security.web.firewall.StrictHttpFirewall
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -57,6 +61,28 @@ class JwtSecurityConfiguration(
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
+    }
+
+    @Bean
+    fun configureFirewall(): HttpFirewall {
+        val strictHttpFirewall = StrictHttpFirewall()
+        strictHttpFirewall.setAllowedHttpMethods(
+            listOf(
+                "GET",
+                "POST",
+                "DELETE",
+                "OPTIONS"
+            )
+        ) // Allow only HTTP GET, POST, DELETE and OPTIONS methods
+        return strictHttpFirewall
+    }
+
+    /*
+     Use this bean if you are using Spring Security 5.4 and above
+     */
+    @Bean
+    fun requestRejectedHandler(): RequestRejectedHandler {
+        return HttpStatusRequestRejectedHandler() // Default status code is 400. Can be customized
     }
 
     @Autowired
