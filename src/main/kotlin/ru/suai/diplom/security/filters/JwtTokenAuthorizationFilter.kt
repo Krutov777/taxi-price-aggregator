@@ -9,6 +9,7 @@ import ru.suai.diplom.security.filters.JwtTokenAuthenticationFilter.Companion.AU
 import ru.suai.diplom.security.repositories.WhiteListRepository
 import ru.suai.diplom.security.utils.AuthorizationHeaderUtil
 import ru.suai.diplom.security.utils.JwtUtil
+import ru.suai.diplom.utils.constants.GlobalConstants
 import java.io.IOException
 import javax.servlet.FilterChain
 import javax.servlet.ServletException
@@ -37,7 +38,7 @@ class JwtTokenAuthorizationFilter(
                 val jwt: String = authorizationHeaderUtil.getToken(request)
                 return try {
                     if (!whiteListRepository.exists(jwt, jwtUtil.parse(jwt).email.toString())) {
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, GlobalConstants.UNAUTHORIZED)
                     } else {
                         val authenticationToken: Authentication = jwtUtil.buildAuthentication(jwt)
                         SecurityContextHolder.getContext().authentication = authenticationToken
@@ -45,7 +46,7 @@ class JwtTokenAuthorizationFilter(
                     }
                 } catch (e: Exception) {
                     log.info(e.message)
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, GlobalConstants.UNAUTHORIZED)
                 }
             } else {
                 filterChain.doFilter(request, response)

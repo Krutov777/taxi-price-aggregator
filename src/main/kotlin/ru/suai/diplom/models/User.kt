@@ -31,7 +31,7 @@ open class User(
     }
 
     enum class Role {
-        USER
+        USER, ADMIN
     }
 
     companion object {

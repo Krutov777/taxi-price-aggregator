@@ -11,6 +11,7 @@ import ru.suai.diplom.security.details.UserDetails
 import ru.suai.diplom.security.repositories.WhiteListRepository
 import ru.suai.diplom.security.utils.AuthorizationHeaderUtil
 import ru.suai.diplom.security.utils.JwtUtil
+import ru.suai.diplom.utils.constants.GlobalConstants
 import java.io.IOException
 import javax.servlet.FilterChain
 import javax.servlet.ServletException
@@ -73,7 +74,7 @@ class JwtTokenAuthenticationFilter(
         response: HttpServletResponse,
         failed: AuthenticationException
     ) {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, GlobalConstants.UNAUTHORIZED)
     }
 
     @Throws(IOException::class)

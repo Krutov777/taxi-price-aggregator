@@ -10,6 +10,7 @@ import ru.suai.diplom.exceptions.RefreshTokenException
 import ru.suai.diplom.security.authentication.RefreshTokenAuthentication
 import ru.suai.diplom.security.repositories.WhiteListRepository
 import ru.suai.diplom.security.utils.JwtUtil
+import ru.suai.diplom.utils.constants.GlobalConstants
 
 
 @Component
@@ -23,7 +24,7 @@ class RefreshTokenAuthenticationProvider(
     override fun authenticate(authentication: Authentication): Authentication {
         val token = authentication.credentials as String
         if (!whiteListRepository.exists(token, jwtUtil.parse(token).email.toString())) {
-            throw RefreshTokenException("Token was revoked")
+            throw RefreshTokenException("Токен отозван")
         }
         return try {
             jwtUtil.buildAuthentication(token)

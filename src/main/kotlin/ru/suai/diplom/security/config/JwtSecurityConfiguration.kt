@@ -70,6 +70,7 @@ class JwtSecurityConfiguration(
             listOf(
                 "GET",
                 "POST",
+                "PUT",
                 "DELETE",
                 "OPTIONS"
             )
