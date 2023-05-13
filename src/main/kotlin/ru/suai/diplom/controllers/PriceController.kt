@@ -48,7 +48,8 @@ class PriceController(
         longitudeFrom: Double,
         latitudeFrom: Double,
         longitudeTo: Double,
-        latitudeTo: Double
+        latitudeTo: Double,
+//        page: Int
     ): ResponseEntity<HistoryPriceResponse> {
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -57,14 +58,23 @@ class PriceController(
                     longitudeFrom = longitudeFrom,
                     latitudeFrom = latitudeFrom,
                     longitudeTo = longitudeTo,
-                    latitudeTo = latitudeTo
+                    latitudeTo = latitudeTo,
+//                    page = page
                 )
             )
     }
 
-    override fun getHistoryPriceByAuthentication(authentication: Authentication?): ResponseEntity<HistoryPriceResponse> {
+    override fun getHistoryPriceByAuthentication(
+        authentication: Authentication?,
+//        page: Int
+    ): ResponseEntity<HistoryPriceResponse> {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(priceService.getHistoryPrice(authentication))
+            .body(
+                priceService.getHistoryPrice(
+                    authentication,
+//                    page
+                )
+            )
     }
 }

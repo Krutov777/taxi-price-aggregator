@@ -26,7 +26,7 @@ class RequestFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        if (request.method == HttpMethod.GET.toString() && request.requestURI.equals("/taxi-aggregator/api/prices")){
+        if (request.method == HttpMethod.POST.toString() && request.requestURI.equals("/taxi-aggregator/api/prices")){
             val userId = rateLimiter.userService.getUserByAuthentication(SecurityContextHolder.getContext().authentication).id
             if (userId != null) {
                 val bucket: Bucket = rateLimiter.resolveBucket(userId.toString())

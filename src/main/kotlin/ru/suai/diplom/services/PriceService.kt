@@ -24,11 +24,13 @@ interface PriceService {
         longitudeFrom: Double,
         latitudeFrom: Double,
         longitudeTo: Double,
-        latitudeTo: Double
+        latitudeTo: Double,
+//        page: Int
     ): HistoryPriceResponse
 
     fun getHistoryPrice(
-        authentication: Authentication?
+        authentication: Authentication?,
+//        page: Int
     ): HistoryPriceResponse
 
 }

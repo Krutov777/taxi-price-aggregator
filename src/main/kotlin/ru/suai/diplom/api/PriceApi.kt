@@ -85,6 +85,7 @@ interface PriceApi {
         @Valid @NotNull @Parameter(description = "Широта 'Откуда'") @RequestParam("latitudeFrom") latitudeFrom: Double,
         @Valid @NotNull @Parameter(description = "Долгота 'Куда'") @RequestParam("longitudeTo") longitudeTo: Double,
         @Valid @NotNull @Parameter(description = "Широта 'Куда'") @RequestParam("latitudeTo") latitudeTo: Double,
+//        @Valid @NotNull @Parameter(description = "Номер страницы") @RequestParam("page") page: Int,
     ): ResponseEntity<HistoryPriceResponse>
 
     @Operation(summary = "Получение истории цен на такси для пользователя")
@@ -100,6 +101,7 @@ interface PriceApi {
     )
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE], value = ["/history_user"])
     fun getHistoryPriceByAuthentication(
-        authentication: Authentication?
+        authentication: Authentication?,
+//        @Valid @NotNull @Parameter(description = "Номер страницы") @RequestParam("page") page: Int,
     ): ResponseEntity<HistoryPriceResponse>
 }

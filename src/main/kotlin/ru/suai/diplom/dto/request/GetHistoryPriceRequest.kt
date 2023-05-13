@@ -28,5 +28,9 @@ data class GetHistoryPriceRequest(
 
     @Schema(description = "Широта 'Куда'")
     @field:NotNull
-    var latitudeBefore: Double
+    var latitudeBefore: Double,
+
+    @Schema(description = "Номер страницы")
+    @field:NotNull
+    var page: Int
 )

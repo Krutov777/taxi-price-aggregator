@@ -4,11 +4,14 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.PageRequest
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.stereotype.Service
 import ru.suai.diplom.dto.request.addOrderHistoryRequest
+import ru.suai.diplom.dto.response.HistoryPrice
 import ru.suai.diplom.dto.response.HistoryPriceResponse
 import ru.suai.diplom.dto.response.TaxiPriceResponse
 import ru.suai.diplom.dto.response.TaxiPricesResponse
@@ -23,6 +26,7 @@ import java.time.ZoneId
 import java.util.*
 import javax.transaction.Transactional
 
+
 @Service
 class PriceServiceImpl(
     private val priceRepository: PriceRepository,
@@ -32,6 +36,7 @@ class PriceServiceImpl(
     private val taxiRepository: TaxiRepository,
     private val userRepository: UserRepository,
     private val priceClient: PriceClient,
+    @Value("\${default-page-size}") private val defaultPageSize: Int
 ) : PriceService {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -162,7 +167,8 @@ class PriceServiceImpl(
         longitudeFrom: Double,
         latitudeFrom: Double,
         longitudeTo: Double,
-        latitudeTo: Double
+        latitudeTo: Double,
+//        page: Int
     ): HistoryPriceResponse {
         val routeList: List<Route> = routeRepository.findAll(
             fromLatitude = latitudeFrom,
@@ -171,22 +177,43 @@ class PriceServiceImpl(
             toLongitude = longitudeTo
         )
         return if (routeList.isNotEmpty()) {
-            val priceHistory = priceRepository.findByRoute(routeList[0])
-            if (priceHistory.isEmpty())
-                return HistoryPriceResponse(mapOf())
-            val priceHistoryTaxiPriceResponse: List<TaxiPriceResponse> = priceHistory.map { TaxiPriceResponse(
-                nameTaxi = it.taxi.name,
-                price = it.price,
-                currency = it.currency,
-                dateTime = it.dateTime,
-                dateTimeNumber = it.dateTime?.time
-            ) }
-            return HistoryPriceResponse(priceHistoryTaxiPriceResponse.groupBy { it.dateTimeNumber ?: 0 })
-
-        } else HistoryPriceResponse(mapOf())
+            val listHistoryPrice = mutableListOf<HistoryPrice>()
+            for (route in routeList) {
+//                val pageRequest = PageRequest.of(page, defaultPageSize)
+//                val priceHistory = priceRepository.findByRoute(route, pageRequest)
+                val priceHistory = priceRepository.findByRoute(route)
+                if (priceHistory.isEmpty()) {
+                    return HistoryPriceResponse(listOf())
+                }
+                val priceHistoryTaxiPriceResponse: List<TaxiPriceResponse> = priceHistory.map {
+                    TaxiPriceResponse(
+                        nameTaxi = it.taxi.name,
+                        price = it.price,
+                        currency = it.currency,
+                        dateTime = it.dateTime,
+                        dateTimeNumber = it.dateTime?.time
+                    )
+                }
+                listHistoryPrice.add(
+                    HistoryPrice(
+                        prices = priceHistoryTaxiPriceResponse,
+                        fromAddress = route.fromAddress ?: "",
+                        toAddress = route.toAddress ?: "",
+                        fromLongitude = route.fromLongitude ?: 0.0,
+                        fromLatitude = route.fromLatitude ?: 0.0,
+                        toLongitude = route.toLongitude ?: 0.0,
+                        toLatitude = route.toLatitude ?: 0.0
+                    )
+                )
+            }
+            return HistoryPriceResponse(listHistoryPrice)
+        } else HistoryPriceResponse(listOf())
     }
 
-    override fun getHistoryPrice(authentication: Authentication?): HistoryPriceResponse {
+    override fun getHistoryPrice(
+        authentication: Authentication?,
+//        page: Int
+    ): HistoryPriceResponse {
         if (authentication == null) {
             throw object : AuthenticationException(GlobalConstants.UNAUTHORIZED) {}
         } else {
@@ -197,21 +224,39 @@ class PriceServiceImpl(
                 ?.let { it ->
                     val routeList: List<Route> = orderHistoryRepository.findAll(userId = it.id ?: 0).map { it.route }
                     return if (routeList.isNotEmpty()) {
-                        val priceHistory = priceRepository.findByRoute(routeList[0])
-                        if (priceHistory.isEmpty())
-                            return HistoryPriceResponse(mapOf())
-                        val priceHistoryTaxiPriceResponse: List<TaxiPriceResponse> = priceHistory.map { TaxiPriceResponse(
-                            nameTaxi = it.taxi.name,
-                            price = it.price,
-                            currency = it.currency,
-                            dateTime = it.dateTime,
-                            dateTimeNumber = it.dateTime?.time
-                        ) }
-                        return HistoryPriceResponse(priceHistoryTaxiPriceResponse.groupBy { it.dateTimeNumber ?: 0 })
+                        val listHistoryPrice = mutableListOf<HistoryPrice>()
+                        for (route in routeList) {
+//                            val pageRequest = PageRequest.of(page, defaultPageSize)
+//                            val priceHistory = priceRepository.findByRoute(route, pageRequest)
+                            val priceHistory = priceRepository.findByRoute(route)
+                            if (priceHistory.isEmpty())
+                                return HistoryPriceResponse(listOf())
+                            val priceHistoryTaxiPriceResponse: List<TaxiPriceResponse> = priceHistory.map {
+                                TaxiPriceResponse(
+                                    nameTaxi = it.taxi.name,
+                                    price = it.price,
+                                    currency = it.currency,
+                                    dateTime = it.dateTime,
+                                    dateTimeNumber = it.dateTime?.time
+                                )
+                            }
+                            listHistoryPrice.add(
+                                HistoryPrice(
+                                    prices = priceHistoryTaxiPriceResponse,
+                                    fromAddress = route.fromAddress ?: "",
+                                    toAddress = route.toAddress ?: "",
+                                    fromLongitude = route.fromLongitude ?: 0.0,
+                                    fromLatitude = route.fromLatitude ?: 0.0,
+                                    toLongitude = route.toLongitude ?: 0.0,
+                                    toLatitude = route.toLatitude ?: 0.0
+                                )
+                            )
+                        }
+                        return HistoryPriceResponse(listHistoryPrice)
 
-                    } else HistoryPriceResponse(mapOf())
+                    } else HistoryPriceResponse(listOf())
                 }
-            return HistoryPriceResponse(mapOf())
+            return HistoryPriceResponse(listOf())
         }
     }
 
@@ -263,7 +308,7 @@ class PriceServiceImpl(
 //}
 
 
-    @Scheduled(fixedDelay = 60*60*1000) // each hour
+    @Scheduled(fixedDelay = 60 * 60 * 1000) // each hour
     fun countHistoryPrice() = runBlocking {
         val scope = CoroutineScope(SupervisorJob())
         val channel: Channel<Price?> = Channel()
