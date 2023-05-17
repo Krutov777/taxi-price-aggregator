@@ -65,7 +65,7 @@ interface PriceApi {
             ApiResponse(responseCode = "429", description = "Слишком много запросов")
         ]
     )
-    @PostMapping
+    @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE], value = ["/history"])
     fun addOrderHistoryPrice(@Valid @RequestBody addOrderHistoryRequest: addOrderHistoryRequest, authentication: Authentication?): ResponseEntity<HttpStatus>
 
     @Operation(summary = "Получение истории цен на такси")

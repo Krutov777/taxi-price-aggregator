@@ -222,7 +222,7 @@ class PriceServiceImpl(
                 userRepository.findByEmail(it) ?: throw UserNotFoundException(GlobalConstants.USER_NOT_FOUND)
             }
                 ?.let { it ->
-                    val routeList: List<Route> = orderHistoryRepository.findAll(userId = it.id ?: 0).map { it.route }
+                    val routeList: List<Route> = orderHistoryRepository.findAll(userId = it.id ?: 0).distinctBy { it.route.id }.map { it.route }
                     return if (routeList.isNotEmpty()) {
                         val listHistoryPrice = mutableListOf<HistoryPrice>()
                         for (route in routeList) {
@@ -312,7 +312,7 @@ class PriceServiceImpl(
     fun countHistoryPrice() = runBlocking {
         val scope = CoroutineScope(SupervisorJob())
         val channel: Channel<Price?> = Channel()
-        val orderHistory = orderHistoryRepository.findAll(OrderHistory.Status.IN_WORK.toString())
+        val orderHistory = orderHistoryRepository.findAll(OrderHistory.Status.IN_WORK.toString()).distinctBy { it.route.id }
         if (orderHistory.isEmpty())
             return@runBlocking
         val currentDateTime = Date()
@@ -371,7 +371,6 @@ class PriceServiceImpl(
             if ((dayOrder.plus(2) <= currentDay)
                 || ((dayOrder.plus(1) == currentDay && timeOrder <= currentTime))
             ) {
-                orderHistoryRepository.delete(item)
                 item.status = OrderHistory.Status.COMPLETED
                 orderHistoryRepository.save(item)
             }

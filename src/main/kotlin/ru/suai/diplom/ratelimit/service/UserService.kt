@@ -39,7 +39,7 @@ class UserService(
     }
 
     @CacheEvict(value = ["userList"], allEntries = true)
-    @Scheduled(fixedDelayString = "\${caching.spring.userListTTL}", initialDelay = 86400000) //one day
+    @Scheduled(fixedDelayString = "\${caching.spring.userListTTL}", initialDelay = 71712000) //one day
     fun deleteUserList() {
         logger.info("Исключить список пользователей")
     }
