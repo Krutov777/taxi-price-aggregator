@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 import ru.suai.diplom.dto.request.ResetPasswordRequest
 import ru.suai.diplom.dto.request.SignUpForm
 import ru.suai.diplom.dto.response.SignUpResponse
+import ru.suai.diplom.dto.response.UserInfoResponse
 import ru.suai.diplom.exceptions.*
 import ru.suai.diplom.models.PasswordResetToken
 import ru.suai.diplom.models.User
@@ -121,6 +122,21 @@ class SignUpServiceImpl(
         else
             throw UserNotFoundException("Пользователя с таким токеном восстановления пароля не существует")
 
+    }
+
+    override fun getUserInfo(authentication: Authentication?): UserInfoResponse {
+        if (authentication == null) {
+            throw object : AuthenticationException(UNAUTHORIZED) {}
+        } else {
+            val userDetails = authentication.principal as? UserDetails
+            val user: User = userRepository.findByEmail(userDetails?.username ?: "") ?: throw UserNotFoundException("Пользователь с таким токеном не найден.")
+            return UserInfoResponse(
+                login = user.login ?: "",
+                email = user.email ?: "",
+                firstName = user.firstName ?: "",
+                lastName = user.lastName ?: "",
+            )
+        }
     }
 
     fun changeUserPassword(user: User, password: String?) {

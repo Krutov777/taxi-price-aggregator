@@ -8,6 +8,7 @@ import ru.suai.diplom.api.RegistrationApi
 import ru.suai.diplom.dto.request.ResetPasswordRequest
 import ru.suai.diplom.dto.request.SignUpForm
 import ru.suai.diplom.dto.response.SignUpResponse
+import ru.suai.diplom.dto.response.UserInfoResponse
 import ru.suai.diplom.services.SignUpService
 
 
@@ -38,6 +39,13 @@ class RegistrationController(private val signUpService: SignUpService) : Registr
     override fun updatePassword(resetPasswordRequest: ResetPasswordRequest): ResponseEntity<HttpStatus> {
         signUpService.updatePassword(resetPasswordRequest)
         return ResponseEntity.status(HttpStatus.OK).build()
+    }
+
+    override fun getUserInfo(authentication: Authentication?): ResponseEntity<UserInfoResponse> {
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(signUpService.getUserInfo(authentication))
     }
 
 

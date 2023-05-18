@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*
 import ru.suai.diplom.dto.request.ResetPasswordRequest
 import ru.suai.diplom.dto.request.SignUpForm
 import ru.suai.diplom.dto.response.SignUpResponse
+import ru.suai.diplom.dto.response.UserInfoResponse
 import javax.validation.Valid
 import javax.validation.constraints.NotEmpty
 
@@ -103,5 +104,22 @@ interface RegistrationApi {
     fun updatePassword(
         @Valid @RequestBody resetPasswordRequest: ResetPasswordRequest
     ): ResponseEntity<HttpStatus>
+
+    @Operation(summary = "Информация о пользователе")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "Информация о пользователе получена",
+            content = [Content(schema = Schema(implementation = UserInfoResponse::class))]
+        ),
+            ApiResponse(responseCode = "400", description = "Неправильно введены данные"),
+            ApiResponse(responseCode = "404", description = "Пользователь не найден"),
+            ApiResponse(responseCode = "429", description = "Слишком много запросов")
+        ]
+    )
+    @GetMapping(value = ["/user"], produces = [APPLICATION_JSON_VALUE])
+    fun getUserInfo(
+        authentication: Authentication?
+    ): ResponseEntity<UserInfoResponse>
 
 }
