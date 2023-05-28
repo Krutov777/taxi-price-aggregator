@@ -29,7 +29,7 @@ class UserService(
         val userDetails = authentication.principal as? UserDetails
         return userRepository.findByEmail(
             userDetails?.username ?: ""
-        ) ?: throw UserNotFoundException(GlobalConstants.USER_NOT_FOUND)
+        ) ?: throw object : AuthenticationException(GlobalConstants.UNAUTHORIZED) {}
     }
 
     @Cacheable(value = ["userList"], key = "#user")

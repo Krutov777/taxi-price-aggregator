@@ -67,7 +67,6 @@ class PriceServiceImpl(
                 )
             )
         } else routeList[0]
-//        delay(10000)
 
         val taxinfResponse: List<TaxiPriceResponse> = priceClient.getTaxiPricesAsync(
             latitudeFromParam = latitudeFrom,
@@ -320,7 +319,7 @@ class PriceServiceImpl(
             val priceList = mutableListOf<Price?>()
             channel.consumeEach {
                 priceList.add(it)
-                if (orderHistory.size * 3 == priceList.size)
+                if (orderHistory.size * 4 == priceList.size)
                     channel.close()
             }
             priceRepository.saveAll(priceList.mapNotNull { it })
@@ -328,7 +327,7 @@ class PriceServiceImpl(
 
         val handler = CoroutineExceptionHandler { _, exception ->
             scope.launch {
-                repeat(3) {
+                repeat(4) {
                     channel.send(null)
                 }
             }
@@ -356,6 +355,9 @@ class PriceServiceImpl(
                             )
                         )
                     }
+                }
+                for(i in 1..4 - taxinfResponse.size) {
+                    channel.send(null)
                 }
             }
         }
