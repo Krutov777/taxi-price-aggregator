@@ -5,7 +5,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.domain.PageRequest
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
@@ -22,7 +21,7 @@ import ru.suai.diplom.security.details.UserDetails
 import ru.suai.diplom.services.PriceService
 import ru.suai.diplom.services.clients.PriceClient
 import ru.suai.diplom.utils.constants.GlobalConstants
-import java.time.ZoneId
+import java.time.Duration
 import java.util.*
 import javax.transaction.Transactional
 
@@ -336,7 +335,6 @@ class PriceServiceImpl(
 
         for (itemOrderHistory in orderHistory) {
             scope.launch(handler) {
-//                delay(10000)
                 val taxinfResponse = priceClient.getTaxiPricesAsync(
                     latitudeFromParam = itemOrderHistory.route.fromLatitude ?: return@launch,
                     longitudeFromParam = itemOrderHistory.route.fromLongitude ?: return@launch,
@@ -363,18 +361,14 @@ class PriceServiceImpl(
         }
         job.join()
         for (item in orderHistory) {
-            val instantOrder = item.dateTime?.toInstant()
-            val dayOrder = instantOrder?.atZone(ZoneId.systemDefault())?.dayOfMonth ?: continue
-            val timeOrder = instantOrder.atZone(ZoneId.systemDefault())?.toLocalTime() ?: continue
+            val orderInstantDateTime = item.dateTime!!.toInstant()
+            val currentInstantDateTime = currentDateTime.toInstant()
 
-            val currentInstant = currentDateTime.toInstant()
-            val currentDay = currentInstant?.atZone(ZoneId.systemDefault())?.dayOfMonth ?: continue
-            val currentTime = currentInstant.atZone(ZoneId.systemDefault())?.toLocalTime() ?: continue
-            if ((dayOrder.plus(2) <= currentDay)
-                || ((dayOrder.plus(1) == currentDay && timeOrder <= currentTime))
-            ) {
+            val  deltaDuration: Duration = Duration.between(orderInstantDateTime, currentInstantDateTime)
+            if (deltaDuration.toDays() >= 1L || deltaDuration.toDays() <= -1L) {
                 item.status = OrderHistory.Status.COMPLETED
                 orderHistoryRepository.save(item)
+                // The two instants differ by exactly 1 day
             }
         }
     }
