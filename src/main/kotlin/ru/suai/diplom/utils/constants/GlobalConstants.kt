@@ -1,6 +1,9 @@
 package ru.suai.diplom.utils.constants
 
 object GlobalConstants {
+    const val BASE_URL_TAXOVICHKOF = "https://dispatcher.taxovichkof.ru/api/price"
+    const val BASE_URL_AUTH_TAXOVICHKOF = "https://dispatcher.taxovichkof.ru/secure/api/auth"
+    const val BASE_URL_CITYMOBIL = "https://widget.city-mobil.ru/c-api"
     const val BASE_URL_YANDEX = "https://taxi-routeinfo.taxi.yandex.net/taxi_info"
     const val BASE_URL_TAXINF = "https://api.taxinf.ru/get_prices/?" +
             "city_name=&from_address_1st_line=from&from_address_2st_line=" +

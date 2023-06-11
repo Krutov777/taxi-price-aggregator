@@ -318,7 +318,7 @@ class PriceServiceImpl(
             val priceList = mutableListOf<Price?>()
             channel.consumeEach {
                 priceList.add(it)
-                if (orderHistory.size * 4 == priceList.size)
+                if (orderHistory.size * 5 == priceList.size)
                     channel.close()
             }
             priceRepository.saveAll(priceList.mapNotNull { it })
@@ -326,7 +326,7 @@ class PriceServiceImpl(
 
         val handler = CoroutineExceptionHandler { _, exception ->
             scope.launch {
-                repeat(4) {
+                repeat(5) {
                     channel.send(null)
                 }
             }
@@ -354,7 +354,7 @@ class PriceServiceImpl(
                         )
                     }
                 }
-                for(i in 1..4 - taxinfResponse.size) {
+                for(i in 1..5 - taxinfResponse.size) {
                     channel.send(null)
                 }
             }
